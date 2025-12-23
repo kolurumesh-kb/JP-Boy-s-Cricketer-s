@@ -5,21 +5,17 @@
 <title>JP Boy's – Match Schedule</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
-/* ===== GLOBAL ===== */
-html, body {
-  height: 100%;
+body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
   background: #f4f6fa;
 }
 
-body {
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== HEADER ===== */
+/* HEADER */
 .header {
   background: linear-gradient(90deg, #123b7a, #1e5aa8);
   color: #fff;
@@ -29,13 +25,12 @@ body {
   align-items: center;
 }
 
-.header h1 {
-  font-size: 18px;
-  margin: 0;
-  white-space: nowrap;
+.header-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-/* Dashboard button (MATCHES OTHER PAGES) */
 .nav-btn {
   background: #ffeb3b;
   color: #000;
@@ -43,150 +38,262 @@ body {
   padding: 8px 18px;
   border-radius: 22px;
   font-weight: 700;
-  font-size: 14px;
-  transition: 0.2s ease;
 }
 
-.nav-btn:hover {
-  background: #ffd600;
-}
-
-/* ===== ANNOUNCEMENT BAR ===== */
-.announcement {
-  position: relative;
-  background: linear-gradient(90deg, #ff9800, #ff5722);
+/* PDF BUTTON */
+.pdf-btn {
+  background: #4caf50;
   color: #fff;
-  padding: 10px 45px 10px 15px;
-  overflow: hidden;
-  font-weight: 600;
-}
-
-.announcement .text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: scrollText 18s linear infinite;
-}
-
-.close-ann {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 22px;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  color: #fff;
-  background: rgba(0,0,0,0.25);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none;
 }
 
-.close-ann:hover {
-  background: rgba(0,0,0,0.4);
-}
-
-@keyframes scrollText {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
-}
-
-/* ===== MAIN CONTENT ===== */
+/* MAIN */
 .main-content {
-  flex: 1;
-  padding: 30px 15px;
+  padding: 20px;
 }
 
-/* ===== MATCH CARD ===== */
+/* SETUP CARD */
+.setup-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  max-width: 560px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.setup-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.generate-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: #1e5aa8;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* MATCH CARD */
 .match-card {
   background: #fff;
   border-radius: 16px;
-  padding: 25px;
-  margin: 20px auto;
-  max-width: 520px;
+  padding: 20px;
+  margin: 15px auto;
+  max-width: 560px;
   text-align: center;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-.match-card h3 {
-  margin: 8px 0;
+.stage {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e5aa8;
 }
 
 .vs {
-  color: #ff5722;
   font-weight: 800;
-  font-size: 18px;
+  color: #ff5722;
+  margin: 6px 0;
 }
 
 .match-info {
-  margin-top: 10px;
-  color: #444;
   font-size: 14px;
+  margin-top: 8px;
+  color: #444;
 }
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 .footer {
   background: linear-gradient(90deg, #123b7a, #1e5aa8);
   color: #fff;
   text-align: center;
   padding: 12px;
-  font-size: 14px;
+  margin-top: 30px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
 <div class="header">
-  <h1>🏏 JP Boy's Cricketer's</h1>
-  <a href="index.html" class="nav-btn">Dashboard</a>
+  <h3>🏏 JP Boy's Cricketer's</h3>
+
+  <div class="header-right">
+    <button class="pdf-btn" id="pdfBtn" onclick="downloadPDF()">Download PDF</button>
+    <a href="index.html" class="nav-btn">Dashboard</a>
+  </div>
 </div>
 
-<!-- ===== ANNOUNCEMENT ===== -->
-<div class="announcement" id="announcement">
-  <span class="text">
-    📢 Cricket Tournament Season-4 schedule will be updated soon. Stay tuned.....
-  </span>
-  <span class="close-ann" onclick="closeAnnouncement()">✖</span>
-</div>
-
-<!-- ===== MAIN CONTENT ===== -->
 <div class="main-content">
 
-  <div class="match-card">
-    <h3>JP Boy's</h3>
-    <div class="vs">VS</div>
-    <h3>Super Kings XI</h3>
-    <div class="match-info">
-      📅 15 March 2026 &nbsp; | ⏰ 9:00 AM<br>
-      📍 City Cricket Ground
-    </div>
+  <!-- SETUP -->
+  <div class="setup-card" id="setupCard">
+    <h3>Tournament Setup</h3>
+
+    <input type="date" id="startDate">
+    <input type="time" id="startTime">
+    <input type="number" id="duration" value="80">
+    <input type="number" id="days" value="2">
+    <input type="text" id="location" placeholder="Match Location">
+
+    <hr>
+
+    <input placeholder="Team 1">
+    <input placeholder="Team 2">
+    <input placeholder="Team 3">
+    <input placeholder="Team 4">
+    <input placeholder="Team 5">
+    <input placeholder="Team 6">
+
+    <button class="generate-btn" onclick="generateSchedule()">
+      Generate Tournament Schedule
+    </button>
   </div>
 
-  <div class="match-card">
-    <h3>Royal Strikers</h3>
-    <div class="vs">VS</div>
-    <h3>Thunder Kings</h3>
-    <div class="match-info">
-      📅 16 March 2026 &nbsp; | ⏰ 9:00 AM<br>
-      📍 JP Sports Arena
-    </div>
-  </div>
+  <div id="schedule"></div>
 
 </div>
 
-<!-- ===== FOOTER ===== -->
 <div class="footer">
   🏏 JP Boy's Cricketer's © 2026 | Designed by K B Umesh
 </div>
 
 <script>
-function closeAnnouncement(){
-  document.getElementById("announcement").style.display = "none";
+let scheduleData = [];
+
+function generateSchedule(){
+  scheduleData = [];
+
+  const startDateVal = document.getElementById("startDate").value;
+  const startTimeVal = document.getElementById("startTime").value;
+  const duration = parseInt(document.getElementById("duration").value);
+  const totalDays = parseInt(document.getElementById("days").value);
+  const location = document.getElementById("location").value;
+
+  if(!startDateVal || !startTimeVal || !duration || !totalDays || !location){
+    alert("Fill all details");
+    return;
+  }
+
+  const inputs = document.querySelectorAll(".setup-card input");
+  let teams = [];
+  inputs.forEach((i, idx) => {
+    if(idx >= 5 && i.value.trim()) teams.push(i.value.trim());
+  });
+
+  if(teams.length !== 6){
+    alert("Enter exactly 6 teams");
+    return;
+  }
+
+  document.getElementById("setupCard").style.display = "none";
+  document.getElementById("pdfBtn").style.display = "inline-block";
+
+  const scheduleDiv = document.getElementById("schedule");
+  scheduleDiv.innerHTML = "";
+
+  let fixed = teams[0];
+  let rotating = teams.slice(1);
+
+  let currentDate = new Date(startDateVal);
+  let [sh, sm] = startTimeVal.split(":").map(Number);
+  let startMinutes = sh * 60 + sm;
+  let currentMinutes = startMinutes;
+
+  let dayCounter = 1;
+  let matchesToday = 0;
+  const MAX_MATCHES = 11;
+  let matchNo = 1;
+
+  function nextSlot(){
+    currentMinutes += duration;
+    matchesToday++;
+    if(matchesToday >= MAX_MATCHES){
+      currentDate.setDate(currentDate.getDate() + 1);
+      dayCounter++;
+      matchesToday = 0;
+      currentMinutes = startMinutes;
+    }
+  }
+
+  function timeStr(min){
+    return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+  }
+
+  function addMatch(stage, t1, t2){
+    const dateStr = currentDate.toDateString();
+    const time = timeStr(currentMinutes);
+
+    scheduleData.push(`${stage} | ${t1} vs ${t2} | ${dateStr} | ${time} | ${location}`);
+
+    scheduleDiv.innerHTML += `
+      <div class="match-card">
+        <div class="stage">${stage}</div>
+        <h3>${t1}</h3>
+        <div class="vs">VS</div>
+        <h3>${t2}</h3>
+        <div class="match-info">
+          📅 ${dateStr}<br>
+          ⏰ ${time}<br>
+          📍 ${location}
+        </div>
+      </div>
+    `;
+    nextSlot();
+  }
+
+  for(let r=1; r<=teams.length-1; r++){
+    let rt = [fixed, ...rotating];
+    for(let i=0;i<rt.length/2;i++){
+      if(dayCounter > totalDays) return;
+      addMatch(`League Match ${matchNo++}`, rt[i], rt[rt.length-1-i]);
+    }
+    rotating.unshift(rotating.pop());
+  }
+
+  [["Qualifier 1","Top 1","Top 2"],
+   ["Eliminator","3rd","4th"],
+   ["Qualifier 2","Loser Q1","Winner Eliminator"],
+   ["Final","Winner Q1","Winner Q2"]
+  ].forEach(p=>{
+    if(dayCounter<=totalDays) addMatch(p[0],p[1],p[2]);
+  });
+}
+
+function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(14);
+  doc.text("JP Boy's Cricket Tournament – Match Schedule", 10, 10);
+
+  doc.setFontSize(10);
+  let y = 20;
+
+  scheduleData.forEach(line=>{
+    if(y > 280){
+      doc.addPage();
+      y = 10;
+    }
+    doc.text(line, 10, y);
+    y += 7;
+  });
+
+  doc.save("Match_Schedule.pdf");
 }
 </script>
 
