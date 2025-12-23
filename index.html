@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP Boy's Cricketer's Dashboard</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",sans-serif;
+}
+
+body{
+  background:#000;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ================= HEADER ================= */
+header{
+  background:linear-gradient(90deg,#1976d2,#512da8);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+}
+
+header h1{
+  font-size:20px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+/* Desktop menu */
+.nav-links{
+  display:flex;
+  gap:12px;
+}
+
+.nav-links a{
+  background:#ffeb3b;
+  color:#000;
+  padding:7px 14px;
+  border-radius:20px;
+  text-decoration:none;
+  font-weight:600;
+  font-size:14px;
+}
+
+/* Hamburger */
+.hamburger{
+  display:none;
+  font-size:26px;
+  cursor:pointer;
+}
+
+/* Mobile menu */
+.mobile-menu{
+  display:none;
+  flex-direction:column;
+  background:linear-gradient(90deg,#1976d2,#512da8);
+  position:absolute;
+  top:100%;
+  left:0;
+  width:100%;
+  padding:12px;
+  z-index:1000;
+}
+
+.mobile-menu a{
+  background:#ffeb3b;
+  color:#000;
+  padding:10px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:8px;
+  text-align:center;
+}
+
+/* ================= ANNOUNCEMENT ================= */
+.announcement{
+  background:linear-gradient(90deg,#ff9800,#f57c00);
+  color:#fff;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+
+.marquee{
+  flex:1;
+  white-space:nowrap;
+}
+
+.marquee span{
+  display:inline-block;
+  padding-left:100%;
+  animation:scroll 18s linear infinite;
+}
+
+@keyframes scroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-100%)}
+}
+
+.close-announce{
+  cursor:pointer;
+  margin-left:12px;
+  font-size:18px;
+}
+
+/* ================= COUNTDOWN ================= */
+.announcement-bar{
+  background:linear-gradient(90deg,green,green);
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:600;
+}
+
+#seasonTimer{
+  background:rgba(0,0,0,0.3);
+  padding:6px 10px;
+  border-radius:8px;
+  margin-left:6px;
+}
+
+.announce-close{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* ================= CAROUSEL ================= */
+.carousel{
+  flex:1;
+  overflow:hidden;
+  position:relative;
+}
+
+.carousel-track{
+  display:flex;
+  height:100%;
+  transition:transform 1s ease;
+}
+
+.slide{
+  min-width:100%;
+  position:relative;
+}
+
+.slide img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.caption{
+  position:absolute;
+  top:20px;
+  left:20px;
+  background:rgba(0,0,0,0.65);
+  color:#fff;
+  padding:14px 18px;
+  border-radius:12px;
+  max-width:300px;
+}
+
+.caption h2{
+  font-size:20px;
+}
+
+.caption p{
+  font-size:14px;
+}
+
+/* ================= FOOTER ================= */
+footer{
+  background:linear-gradient(90deg,#1976d2,#512da8);
+  color:#fff;
+  font-size:13px;
+  text-align:center;
+  padding:14px;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:block}
+  header h1{font-size:16px}
+
+  .caption h2{font-size:16px}
+  .caption p{font-size:13px}
+}
+
+/* 
+.whatsapp-banner {
+  background: #25d366;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.whatsapp-banner a {
+  background: #fff;
+  color: #25d366;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-left: 10px;
+} */
+
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <h1>🏏 JP Boy's Cricketer's</h1>
+
+  <div class="nav-links">
+    <a href="register.html">Register</a>
+    <a href="owner.html">Owner's</a>
+    <a href="player.html">Player's</a>
+    <a href="auction.html">Auction</a>
+    <a href="schedule.html">Schedule</a>
+    <a href="records.html">Records</a>
+    <!-- <a href="paymentreceipt.html">PaymentReceipts</a> -->
+     
+  </div>
+
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="register.html">Register</a>
+    <a href="owner.html">Owner's</a>
+    <a href="player.html">Player's</a>
+    <a href="auction.html">Auction</a>
+    <a href="schedule.html">Schedule</a>
+    <a href="records.html">Records</a>
+    <!-- <a href="paymentreceipt.html">PaymentReceipts</a> -->
+     
+  </div>
+</header>
+
+<!-- <div class="whatsapp-banner">
+  📢 Get updates on WhatsApp
+  <a href="https://wa.me/917026444001" target="_blank">Join</a>
+</div> -->
+
+<!-- ANNOUNCEMENT -->
+<div class="announcement" id="announcement">
+  <div class="marquee">
+    <span>📢 Site under maintenance — images loading improved!</span>
+  </div>
+  <span class="close-announce" onclick="hideAnnouncement()">✖</span>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="announcement-bar" id="seasonAnnouncement">
+  <span>
+    🏏 Season-4 starts in
+    <span id="seasonTimer">Loading...</span>
+  </span>
+  <button class="announce-close" onclick="hideCountdown()">✖</button>
+</div>
+
+<!-- CAROUSEL -->
+<div class="carousel">
+  <div class="carousel-track" id="carouselTrack">
+
+    <div class="slide">
+      <img src="assets/images/banner1.jpg">
+      <div class="caption">
+        <h2>🏆 Season-3 Winners</h2>
+        <p>Spartan Stricker's</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <img src="assets/images/banner2.jpg">
+      <div class="caption">
+        <h2>🥈 Season -3 Runners-Up</h2>
+        <p>Fire Fighter's</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <img src="assets/images/banner3.jpg">
+      <div class="caption">
+        <h2>⭐ Season -3 Player of Tournament</h2>
+             <p>Kiran</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
+</footer>
+
+<script>
+/* Carousel */
+let idx=0;
+const track=document.getElementById("carouselTrack");
+setInterval(()=>{
+  idx=(idx+1)%track.children.length;
+  track.style.transform=`translateX(-${idx*100}%)`;
+},3500);
+
+/* Countdown */
+const seasonStart=new Date("2026-03-15T09:00:00").getTime();
+const timer=document.getElementById("seasonTimer");
+
+function updateCountdown(){
+  const now=new Date().getTime();
+  const diff=seasonStart-now;
+
+  if(diff<=0){
+    timer.innerHTML="🔴 LIVE NOW";
+    return;
+  }
+
+  const d=Math.floor(diff/(1000*60*60*24));
+  const h=Math.floor((diff/(1000*60*60))%24);
+  const m=Math.floor((diff/(1000*60))%60);
+  const s=Math.floor((diff/1000)%60);
+
+  timer.innerHTML=`${d}d ${h}h ${m}m ${s}s`;
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+/* UI helpers */
+function toggleMenu(){
+  const m=document.getElementById("mobileMenu");
+  m.style.display=m.style.display==="flex"?"none":"flex";
+}
+function hideAnnouncement(){
+  document.getElementById("announcement").style.display="none";
+}
+function hideCountdown(){
+  document.getElementById("seasonAnnouncement").style.display="none";
+}
+</script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owners | JP Boy's Cricketer's</title>
+
+<style>
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
+body{margin:0;background:#f4f6fb}
+header{background:linear-gradient(90deg,#1976d2,#512da8);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:20px;font-weight:700}
+header a{background:rgba(255,255,255,.25);color:#fff;padding:7px 14px;border-radius:20px;text-decoration:none;font-weight:600}
+.container{max-width:1200px;margin:25px auto;padding:0 15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,.12)}
+.card h2{text-align:center;margin-bottom:15px;font-size:18px;color:#512da8}
+.form-group{margin-bottom:12px}
+label{font-weight:600;font-size:14px}
+input[type=text],input[type=file]{width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid #ccc}
+.preview img{width:90px;height:90px;margin-top:8px;border-radius:12px;object-fit:cover;border:2px solid #ddd}
+.member-row{display:flex;gap:6px;margin-top:6px}
+.member-row input{flex:1}
+.member-row button{background:#e53935;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer}
+.actions{display:flex;gap:8px;margin-top:15px}
+.actions button{flex:1;border:none;padding:10px;border-radius:10px;font-weight:700;cursor:pointer}
+.add-btn{background:#1976d2;color:#fff}
+.download-btn{background:#2e7d32;color:#fff}
+footer {
+  height: 60px;
+  background: linear-gradient(90deg,#1976d2,#512da8);
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+
+/* Announcement base */
+.announcement {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+/* Marquee effect */
+.marquee {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 18s linear infinite;
+}
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Close button */
+.close-announce {
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 16px;
+}
+
+/* Alert types */
+.announcement.info {
+  background: linear-gradient(90deg, #ff9800, #f57c00);
+}
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html">← Back</a>
+  <h1>Team Owners</h1>
+  <div></div>
+</header>
+
+<!-- Announcement Banner -->
+<div class="announcement info" id="announcement">
+  <div class="marquee">
+    <span>
+      📢 As of now no updates for the owner page ! Site is under maintenance , so don't do any registration etc...
+    </span>
+  </div>
+  <span class="close-announce" onclick="closeAnnouncement()">✖</span>
+</div>
+<div class="container" id="cards"></div>
+
+<footer>🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH</footer>
+
+<script>
+/* ================= CONFIG ================= */
+const role = "user"; // change to "admin" for admin
+const TOTAL = 6;
+/* ========================================= */
+
+const container = document.getElementById("cards");
+for(let i=1;i<=TOTAL;i++){
+  container.innerHTML += `
+  <div class="card">
+    <h2>Owner ${i}</h2>
+
+    <div class="form-group">
+      <label>Owner Image</label>
+      <input type="file" accept="image/*" class="admin-only" onchange="preview(this,'ownerImg${i}')">
+      <div class="preview"><img id="ownerImg${i}"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Owner Name</label>
+      <input type="text" id="ownerName${i}" class="editable">
+    </div>
+
+    <div class="form-group">
+      <label>Team Name</label>
+      <input type="text" id="teamName${i}" class="editable">
+    </div>
+
+    <div class="form-group">
+      <label>Team Jersey</label>
+      <input type="file" accept="image/*" class="admin-only" onchange="preview(this,'jerseyImg${i}')">
+      <div class="preview"><img id="jerseyImg${i}"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Team Members</label>
+      <div id="members${i}"></div>
+    </div>
+
+    <div class="actions">
+      <button class="add-btn admin-only" onclick="addMember(${i})">➕ Member</button>
+      <button class="add-btn admin-only" onclick="saveOwner(${i})">💾 Save</button>
+      <button class="download-btn" onclick="downloadOwner(${i})">⬇ Download</button>
+    </div>
+  </div>`;
+}
+
+function preview(input,id){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>document.getElementById(id).src=r.result; r.readAsDataURL(f);
+}
+
+function addMember(i){
+  const d=document.createElement('div'); d.className='member-row';
+  d.innerHTML=`<input type="text" placeholder="Member name"><button onclick="this.parentElement.remove()">✖</button>`;
+  document.getElementById('members'+i).appendChild(d);
+}
+
+function saveOwner(i){
+  const data={
+    ownerName:ownerName(i), teamName:teamName(i),
+    ownerImg:imgSrc('ownerImg'+i), jerseyImg:imgSrc('jerseyImg'+i),
+    members:[...document.querySelectorAll(`#members${i} input`)].map(x=>x.value).filter(Boolean)
+  };
+  localStorage.setItem('owner_'+i,JSON.stringify(data));
+  alert('Saved');
+}
+
+function loadOwners(){
+  for(let i=1;i<=TOTAL;i++){
+    const s=localStorage.getItem('owner_'+i); if(!s) continue;
+    const d=JSON.parse(s);
+    ownerName(i,d.ownerName); teamName(i,d.teamName);
+    if(d.ownerImg) document.getElementById('ownerImg'+i).src=d.ownerImg;
+    if(d.jerseyImg) document.getElementById('jerseyImg'+i).src=d.jerseyImg;
+    const box=document.getElementById('members'+i); box.innerHTML='';
+    (d.members||[]).forEach(m=>{
+      const r=document.createElement('div'); r.className='member-row';
+      r.innerHTML=`<input type="text" value="${m}" readonly>`; box.appendChild(r);
+    });
+  }
+}
+
+function downloadOwner(i){
+  const s=localStorage.getItem('owner_'+i); if(!s) return alert('No data');
+  const d=JSON.parse(s);
+  let csv='Owner Name,Team Name,Team Members\n';
+  csv+=`"${d.ownerName}","${d.teamName}","${(d.members||[]).join(' | ')}"`;
+  const b=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Owner_${i}.csv`; a.click();
+}
+
+function ownerName(i,v){const e=document.getElementById('ownerName'+i); if(v!==undefined)e.value=v; return e.value}
+function teamName(i,v){const e=document.getElementById('teamName'+i); if(v!==undefined)e.value=v; return e.value}
+function imgSrc(id){const s=document.getElementById(id).src; return s&&s.startsWith('data')?s:''}
+
+window.onload=()=>{
+  loadOwners();
+  if(role!=='admin'){
+    document.querySelectorAll('.editable').forEach(e=>e.readOnly=true);
+    document.querySelectorAll('.admin-only').forEach(e=>e.style.display='none');
+  }
+}
+</script>
+
+<script>
+function closeAnnouncement() {
+  document.getElementById("announcement").style.display = "none";
+}
+</script>
+</body>
+</html>

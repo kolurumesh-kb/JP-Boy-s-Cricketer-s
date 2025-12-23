@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JP Boy's – Match Schedule</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ===== GLOBAL ===== */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #f4f6fa;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(90deg, #123b7a, #1e5aa8);
+  color: #fff;
+  padding: 14px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 18px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Dashboard button (MATCHES OTHER PAGES) */
+.nav-btn {
+  background: #ffeb3b;
+  color: #000;
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 22px;
+  font-weight: 700;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #ffd600;
+}
+
+/* ===== ANNOUNCEMENT BAR ===== */
+.announcement {
+  position: relative;
+  background: linear-gradient(90deg, #ff9800, #ff5722);
+  color: #fff;
+  padding: 10px 45px 10px 15px;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+.announcement .text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: scrollText 18s linear infinite;
+}
+
+.close-ann {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(0,0,0,0.25);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-ann:hover {
+  background: rgba(0,0,0,0.4);
+}
+
+@keyframes scrollText {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  padding: 30px 15px;
+}
+
+/* ===== MATCH CARD ===== */
+.match-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  margin: 20px auto;
+  max-width: 520px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.match-card h3 {
+  margin: 8px 0;
+}
+
+.vs {
+  color: #ff5722;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.match-info {
+  margin-top: 10px;
+  color: #444;
+  font-size: 14px;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: linear-gradient(90deg, #123b7a, #1e5aa8);
+  color: #fff;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>🏏 JP Boy's Cricketer's</h1>
+  <a href="index.html" class="nav-btn">Dashboard</a>
+</div>
+
+<!-- ===== ANNOUNCEMENT ===== -->
+<div class="announcement" id="announcement">
+  <span class="text">
+    📢 Cricket Tournament Season-4 schedule will be updated soon. Stay tuned.....
+  </span>
+  <span class="close-ann" onclick="closeAnnouncement()">✖</span>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+
+  <div class="match-card">
+    <h3>JP Boy's</h3>
+    <div class="vs">VS</div>
+    <h3>Super Kings XI</h3>
+    <div class="match-info">
+      📅 15 March 2026 &nbsp; | ⏰ 9:00 AM<br>
+      📍 City Cricket Ground
+    </div>
+  </div>
+
+  <div class="match-card">
+    <h3>Royal Strikers</h3>
+    <div class="vs">VS</div>
+    <h3>Thunder Kings</h3>
+    <div class="match-info">
+      📅 16 March 2026 &nbsp; | ⏰ 9:00 AM<br>
+      📍 JP Sports Arena
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  🏏 JP Boy's Cricketer's © 2026 | Designed by K B Umesh
+</div>
+
+<script>
+function closeAnnouncement(){
+  document.getElementById("announcement").style.display = "none";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JP Boy's Cricketer's</title>
+
+  <style>
+    /* ---------- GLOBAL RESET ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    /* body {
+      background: #f3f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    } */
+
+    body {
+  background: #f3f4f8;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+    /* body {
+  background: #f3f4f8;
+  min-height: 100vh;
+  margin: 0;
+} */
+
+
+    /* ---------- HEADER / BANNER ---------- */
+    header {
+      width: 100%;
+      background: linear-gradient(90deg, #1976d2, #512da8);
+      color: white;
+      text-align: center;
+      padding: 25px 10px 30px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      background: #fff;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ---------- MAIN CONTENT ---------- */
+    /* .container {
+      width: 95%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px 18px;
+      margin-top: -20px;
+      z-index: 5;
+    } */
+.container {
+  width: 95%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 22px 20px;
+  margin: 30px auto 40px;   /* 👈 CENTERED */
+}
+
+    h2 {
+      text-align: center;
+      color: #4a148c;
+      margin-bottom: 8px;
+    }
+
+    p.description {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    /* ---------- FORM ---------- */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    /* ---------- PAYMENT SECTION ---------- */
+    .payment-box {
+      background: #f9f9ff;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+
+    .payment-box h4 {
+      color: #0d47a1;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .upi-id {
+      color: #1b5e20;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .qr {
+      width: 120px;
+      height: 120px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      background: #fff;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .qr:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .qr-note {
+      text-align: center;
+      color: #555;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    /* ---------- QR MODAL ---------- */
+    .qr-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-modal img {
+      width: 90%;
+      max-width: 400px;
+      border-radius: 12px;
+      border: 3px solid #fff;
+    }
+
+    /* ---------- BUTTON ---------- */
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #4a148c, #1976d2);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: linear-gradient(135deg, #6a1b9a, #0d47a1);
+    }
+
+    /* ---------- FOOTER ---------- */
+    /* footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-top: 20px;
+    } */
+
+    /* .site-footer {
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: #fff;
+  background: linear-gradient(90deg, #1976d2, #512da8);
+  padding: 14px 10px;
+  margin-top: 40px;
+} */
+
+.site-footer {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: #fff;
+  background: linear-gradient(90deg, #1976d2, #512da8);
+  padding: 14px 10px;
+}
+
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 22px;
+      }
+
+      header p {
+        font-size: 13px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 14px;
+      }
+
+      .qr {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    /* ===== REGISTER HEADER WITH BACK BUTTON ===== */
+.register-header {
+  width: 100%;
+  background: linear-gradient(90deg, #1976d2, #512da8);
+  color: #fff;
+  padding: 18px 14px 26px;
+  border-bottom-left-radius: 22px;
+  border-bottom-right-radius: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.header-center {
+  text-align: center;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.25s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Announcement base */
+/* .announcement {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+} */
+
+
+.announcement {
+  width: 100%;
+  margin-top: -12px;     /* attaches to curved header */
+  z-index: 3;
+  color: #fff;
+}
+
+
+/* Marquee effect */
+.marquee {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 18s linear infinite;
+}
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Close button */
+.close-announce {
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 16px;
+}
+
+/* Alert types */
+.announcement.info {
+  background: linear-gradient(90deg, #ff9800, #f57c00);
+}
+
+
+
+
+  </style>
+</head>
+<body>
+  <!-- ---------- HEADER ---------- -->
+
+ <header class="register-header">
+  <!-- LEFT -->
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <!-- CENTER -->
+  <div class="header-center">
+    <!-- <img src="logo.png" alt="JP Logo"> -->
+     <img src="assets/images/Logo.png" alt="JP Logo">
+    <h1>🏏 JP Boy's Cricketer's</h1>
+    <!-- <p>
+      JP Boy's Cricket Tournament will be held every 6 months. <strong>Season 4.0!</strong><br>
+      JP Ground • <b>10–12 May 2026</b><br>
+      For regular players – Pincodes <b>560054 & 560022</b>
+    </p> -->
+  </div>
+
+  <!-- RIGHT (EMPTY FOR BALANCE) -->
+  <div></div>
+</header>
+
+<!-- Announcement Banner -->
+<div class="announcement info" id="announcement">
+  <div class="marquee">
+    <span>
+      📢 Latest Updates are Removed few unsed rows and make the registration faster....
+    </span>
+  </div>
+  <span class="close-announce" onclick="closeAnnouncement()">✖</span>
+</div>
+
+  <!-- ---------- MAIN CONTENT ---------- -->
+  <div class="container">
+   <!-- <form id="registerForm" enctype="multipart/form-data" method="POST">
+  <h2>Player Registration Form</h2>
+  <p class="description">Please fill out the details below carefully and upload all required documents.</p>
+
+  <div class="form-group">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" placeholder="Enter full name" required>
+  </div>
+
+  <div class="form-group">
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob" required>
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" placeholder="example@gmail.com" required>
+  </div>
+
+  <div class="form-group">
+    <label for="mobile">Mobile Number</label>
+    <input type="tel" id="mobile" placeholder="10-digit mobile number" required>
+  </div>
+
+  <div class="form-group">
+    <label for="aadhaar">Aadhaar / Voter ID</label>
+    <input type="text" id="aadhaar" placeholder="12-digit Aadhaar or 10-digit Voter ID" required>
+  </div>
+
+  <div class="form-group">
+    <label for="address">Address</label>
+    <textarea id="address" placeholder="Enter your full address with landmark" required></textarea>
+  </div>
+
+
+  <div class="form-group">
+        <label>Upload Player Photo</label>
+       <input type="file" id="playerPhoto" name="playerPhoto" accept="image/*" required>
+      </div>
+
+      <div class="form-group">
+        <label>Upload Aadhaar Photo</label>
+         <input type="file" id="aadhaarPhoto" name="aadhaarPhoto" accept="image/*" required>
+      </div>
+
+  <div class="form-group">
+    <label for="playerType">Select Player Type</label>
+    <select id="playerType" required>
+      <option value="">--Select--</option>
+      <option>Batsman</option>
+      <option>Bowler</option>
+      <option>All-Rounder</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="battingType">Select Batting Type</label>
+    <select id="battingType" required>
+      <option value="">--Select--</option>
+      <option>Right-Hand</option>
+      <option>Left-Hand</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="bowlingType">Select Bowling Type</label>
+    <select id="bowlingType" required>
+      <option value="">--Select--</option>
+      <option>Right-Arm Fast</option>
+      <option>Left-Arm Spin</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="tshirtSize">Select Player T-Shirt Size</label>
+    <select id="tshirtSize" required>
+      <option value="">--Select--</option>
+      <option>S</option>
+      <option>M</option>
+      <option>L</option>
+      <option>XL</option>
+      <option>XXL</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="pincode">Select Area Pincode</label>
+    <select id="pincode" required>
+      <option value="">--Select--</option>
+      <option>560054</option>
+      <option>560022</option>
+    </select>
+  </div>
+
+  <div class="payment-box">
+    <h4>Pay Registration Fee ₹555</h4>
+    <p class="upi-id">umeshcse09@ybl or 8197901199@ybl</p>
+    <p>Or Scan QR to Pay 👇</p>
+    <div class="qr-container">
+      <img src="qr1.png" alt="QR Code 1" class="qr" onclick="openQR(this.src)">
+      <img src="qr2.png" alt="QR Code 2" class="qr" onclick="openQR(this.src)">
+      <img src="qr3.png" alt="QR Code 3" class="qr" onclick="openQR(this.src)">
+    </div>
+    <p class="qr-note">📸 Tap any QR to open full screen and scan easily!</p>
+  </div>
+
+  <label for="photo">Registered Amount Receipt or Photo</label>
+   <input type="file" id="paymentProof" name="paymentProof" accept="image/*" required>
+
+  <button type="submit">Submit Registration</button>
+</form> -->
+
+<form id="registerForm" enctype="multipart/form-data" method="POST">
+  <h2>Player Registration Form</h2>
+  <p class="description">Please fill out the details below carefully and upload all required documents.</p>
+
+  <div class="form-group">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" name="name" placeholder="Enter full name" required>
+  </div>
+
+  <div class="form-group">
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob" name="dob" required>
+  </div>
+<!-- 
+  <div class="form-group">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+  </div> -->
+
+  <div class="form-group">
+    <label for="mobile">Mobile Number</label>
+    <input type="tel" id="mobile" name="mobile" placeholder="10-digit mobile number" required>
+  </div>
+
+  <!-- <div class="form-group">
+    <label for="aadhaar">Aadhaar / Voter ID</label>
+    <input type="text" id="aadhaar" name="aadhaar" placeholder="12-digit Aadhaar or 10-digit Voter ID" required>
+  </div> -->
+
+  <div class="form-group">
+    <label for="address">Address</label>
+    <textarea id="address" name="address" placeholder="Enter your full address with landmark" required></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Upload Player Photo</label>
+    <input type="file" id="playerPhoto" name="playerPhoto" accept="image/*" required>
+  </div>
+
+  <!-- <div class="form-group">
+    <label>Upload Aadhaar Photo</label>
+    <input type="file" id="aadhaarPhoto" name="aadhaarPhoto" accept="image/*" required>
+  </div> -->
+
+  <div class="form-group">
+    <label for="playerType">Select Player Type</label>
+    <select id="playerType" name="playerType" required>
+      <option value="">--Select--</option>
+      <option>Batsman</option>
+      <option>Bowler</option>
+      <option>All-Rounder</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="battingType">Select Batting Type</label>
+    <select id="battingType" name="battingType" required>
+      <option value="">--Select--</option>
+      <option>Right-Hand</option>
+      <option>Left-Hand</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="bowlingType">Select Bowling Type</label>
+    <select id="bowlingType" name="bowlingType" required>
+      <option value="">--Select--</option>
+      <option>Right-Arm Fast</option>
+      <option>Left-Arm Spin</option>
+    </select>
+  </div>
+
+  <!-- <div class="form-group">
+    <label for="tshirtSize">Select Player T-Shirt Size</label>
+    <select id="tshirtSize" name="tshirtSize" required>
+      <option value="">--Select--</option>
+      <option>S</option>
+      <option>M</option>
+      <option>L</option>
+      <option>XL</option>
+      <option>XXL</option>
+    </select>
+  </div> -->
+
+  <!-- <div class="form-group">
+    <label for="pincode">Select Area Pincode</label>
+    <select id="pincode" name="pincode" required>
+      <option value="">--Select--</option>
+      <option>560054</option>
+      <option>560022</option>
+    </select>
+  </div> -->
+
+  <div class="payment-box">
+    <h4>Pay Registration Fee ₹700</h4>
+    <p class="upi-id">umeshcse09@ybl</p>
+    <p>Or Scan QR to Pay 👇</p>
+    <div class="qr-container">
+      <img src="assets/images/qr1.png" alt="QR Code 1" class="qr" onclick="openQR(this.src)">
+      <!-- <img src="qr2.png" alt="QR Code 2" class="qr" onclick="openQR(this.src)">
+      <img src="qr3.png" alt="QR Code 3" class="qr" onclick="openQR(this.src)"> -->
+    </div>
+    <p class="qr-note">📸 Tap QR to open full screen and scan easily!</p>
+  </div>
+
+  <label for="paymentProof">Upload Payment Receipt</label>
+  <input type="file" id="paymentProof" name="paymentProof" accept="image/*" required>
+
+  <button type="submit" >Submit Registration</button>
+</form>
+
+    
+  </div>
+
+  <!-- ---------- QR MODAL ---------- -->
+  <div id="qrModal" class="qr-modal" onclick="closeQR()">
+    <img id="qrFull" src="" alt="Full QR" />
+  </div>
+
+<!-- <footer>
+      🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
+    </footer> -->
+
+    <footer class="site-footer">
+  🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
+</footer>
+
+
+  <script>
+    function openQR(src) {
+      const modal = document.getElementById("qrModal");
+      const qrFull = document.getElementById("qrFull");
+      modal.style.display = "flex";
+      qrFull.src = src;
+    }
+    function closeQR() {
+      document.getElementById("qrModal").style.display = "none";
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+function closeAnnouncement() {
+  document.getElementById("announcement").style.display = "none";
+}
+</script>
+
+
+
+
+
+<!-- <script>
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxmpMboEZdzr4MTtaSzk3qQ3wZUWe4b5Yo7kHQLmTRVUARSxFpAO9y7G9DJKKM6zx434w/exec";
+
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  // ===== BASIC DATA (ONLY TEXT) =====
+  const name = document.getElementById("name").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const role = document.getElementById("playerType").value;
+
+  if (!name || !mobile || !role) {
+    alert("❌ Please fill all required fields");
+    return;
+  }
+
+  // ===== SAVE SMALL DATA TO localStorage =====
+  const players = JSON.parse(localStorage.getItem("players") || "[]");
+
+  players.push({
+    name,
+    mobile,
+    role,
+    registeredAt: new Date().toISOString()
+  });
+
+  localStorage.setItem("players", JSON.stringify(players));
+
+  // ===== SEND TO GOOGLE SHEET =====
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: formData
+    });
+  } catch (error) {
+    console.warn("Sheet submit warning (ignored):", error);
+  }
+
+  // ===== SUCCESS FLOW =====
+  alert("✅ Registration successful!");
+  form.reset();
+  window.location.href = "dashboard.html";
+});
+</script> -->
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmpMboEZdzr4MTtaSzk3qQ3wZUWe4b5Yo7kHQLmTRVUARSxFpAO9y7G9DJKKM6zx434w/exec";
+
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+
+  const player = {
+    name: document.getElementById("name").value,
+    mobile: document.getElementById("mobile").value,
+    role: document.getElementById("playerType").value
+  };
+
+  /* ✅ Save SMALL data to localStorage */
+  const players = JSON.parse(localStorage.getItem("players") || "[]");
+  players.push(player);
+  localStorage.setItem("players", JSON.stringify(players));
+
+  /* ✅ Send full form (with images) to Google Sheet */
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: new FormData(form)
+    });
+  } catch (e) {
+    console.warn("Sheet submit warning ignored");
+  }
+
+  alert("✅ Registration Successful!");
+  form.reset();
+
+  window.location.href = "index.html";
+});
+</script>
+
+
+
+
+<script>
+/* 🔒 SET REGISTRATION LAST DATE */
+const REGISTRATION_END_DATE = "2026-04-30"; // YYYY-MM-DD
+
+const today = new Date();
+const lastDate = new Date(REGISTRATION_END_DATE + "T23:59:59");
+
+// Get submit button without ID
+const submitBtn = document.querySelector("button[type='submit']");
+
+if (today > lastDate && submitBtn) {
+  submitBtn.disabled = true;       // disables click
+  submitBtn.style.cursor = "not-allowed";
+  submitBtn.style.opacity = "0.6";
+}
+</script>
+
+
+
+</body>
+</html>
+
+
+
+  

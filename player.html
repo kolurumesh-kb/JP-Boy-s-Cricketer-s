@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Players | JP Boy's Cricketer's</title>
+
+<style>
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
+body{margin:0;background:#f4f6fb}
+header{background:linear-gradient(90deg,#1976d2,#512da8);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:20px;font-weight:700}
+header a{background:rgba(255,255,255,.25);color:#fff;padding:7px 14px;border-radius:20px;text-decoration:none;font-weight:600}
+
+.container{max-width:1200px;margin:25px auto;padding:0 15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.12);text-align:center}
+.card img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #512da8;margin-bottom:10px}
+.card h3{margin:6px 0;font-size:18px;color:#333}
+.card p{margin:4px 0;font-size:14px;color:#555}
+.role{display:inline-block;margin-top:6px;padding:4px 10px;border-radius:20px;background:#e3f2fd;color:#1976d2;font-size:12px;font-weight:600}
+.top-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, #1976d2, #512da8);
+  color: #fff;
+}
+
+.title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.back-btn,
+.admin-btn {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+footer {
+  height: 60px;
+  background: linear-gradient(90deg,#1976d2,#512da8);
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+
+/* Announcement base */
+.announcement {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+/* Marquee effect */
+.marquee {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 18s linear infinite;
+}
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Close button */
+.close-announce {
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 16px;
+}
+
+/* Alert types */
+.announcement.info {
+  background: linear-gradient(90deg, #ff9800, #f57c00);
+}
+
+
+
+.player-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.player-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.player-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #5b3cc4;
+}
+
+.player-card h3 {
+  margin-top: 10px;
+  font-size: 20px;
+}
+
+.mobile {
+  color: #555;
+  margin: 6px 0;
+}
+
+.role {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: inline-block;
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- <header>
+  <a href="dashboard.html">← Back</a>
+  <h1>Registred Players</h1>
+   <a href="player-admin.html" id="adminLink" style="display:none">Admin</a>
+  <div></div>
+</header> -->
+
+<header class="top-header">
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <h1 class="title">Registered Players</h1>
+
+  <a href="player-admin.html" class="admin-btn" id="adminBtn" style="display:none">Admin</a>
+
+
+  <!-- <a href="player-admin.html" class="admin-btn">Admin</a> -->
+</header>
+
+<!-- Announcement Banner -->
+<div class="announcement info" id="announcement">
+  <div class="marquee">
+    <span>
+      📢Latest Updates are showing counts ,pdf download for all players ! Site is under maintenance , so don't do any registration etc...
+    </span>
+  </div>
+  <span class="close-announce" onclick="closeAnnouncement()">✖</span>
+</div>
+
+
+<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;">
+  <div>
+    <strong>Total Players:</strong> <span id="totalCount">0</span> |
+    🏏 Batsman: <span id="batsmanCount">0</span> |
+    🎯 Bowler: <span id="bowlerCount">0</span> |
+    🔁 All-Rounder: <span id="allrounderCount">0</span>
+  </div>
+
+  <button onclick="downloadPDF()" style="
+    background:#1976d2;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    font-weight:600;">
+    ⬇ Download PDF
+  </button>
+</div>
+
+<!-- <div class="container" id="players"></div> -->
+
+<div class="player-container" id="playerList"></div>
+
+
+<footer>
+  🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
+</footer>
+
+<!-- <script>
+
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxmpMboEZdzr4MTtaSzk3qQ3wZUWe4b5Yo7kHQLmTRVUARSxFpAO9y7G9DJKKM6zx434w/exec";
+
+async function loadPlayers() {
+  try {
+    const res = await fetch(SHEET_API_URL);
+    const data = await res.json();
+
+    const container = document.getElementById("playersContainer");
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>No players registered yet.</p>";
+      return;
+    }
+
+    data.forEach(player => {
+      const card = document.createElement("div");
+      card.className = "player-card";
+
+      card.innerHTML = `
+        <img src="${player.photo}" alt="Player">
+        <h3>${player.name}</h3>
+        <p>${player.role}</p>
+        <p>${player.mobile}</p>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadPlayers);
+
+const role = "user"; 
+// set to "admin" only for admin login
+
+if (role === "admin") {
+  document.getElementById("adminBtn").style.display = "inline-block";
+}
+
+</script> -->
+
+<!-- <script>
+function closeAnnouncement() {
+  document.getElementById("announcement").style.display = "none";
+}
+</script>
+
+
+
+
+
+<script>
+  const playerList = document.getElementById("playerList");
+  const players = JSON.parse(localStorage.getItem("players")) || [];
+
+  if (players.length === 0) {
+    playerList.innerHTML = "<p>No players registered yet.</p>";
+  }
+
+  players.forEach(player => {
+    const card = document.createElement("div");
+    card.className = "player-card";
+
+    card.innerHTML = `
+      <img src="${player.photo}" class="player-img">
+      <h3>${player.name}</h3>
+      <p class="mobile">📞 ${player.mobile}</p>
+      <span class="role">${player.role}</span>
+    `;
+
+    playerList.appendChild(card);
+  });
+</script> -->
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const playerList = document.getElementById("playerList");
+const players = JSON.parse(localStorage.getItem("players")) || [];
+
+let batsman = 0, bowler = 0, allrounder = 0;
+
+playerList.innerHTML = "";
+
+if (players.length === 0) {
+  playerList.innerHTML = "<p style='text-align:center'>No players registered yet.</p>";
+}
+
+players.forEach(player => {
+  if (player.role === "Batsman") batsman++;
+  if (player.role === "Bowler") bowler++;
+  if (player.role === "All-Rounder") allrounder++;
+
+  const card = document.createElement("div");
+  card.className = "player-card";
+
+  card.innerHTML = `
+    <img src="${player.photo}" class="player-img">
+    <h3>${player.name}</h3>
+    <p class="mobile">📞 ${player.mobile}</p>
+    <span class="role">${player.role}</span>
+  `;
+
+  playerList.appendChild(card);
+});
+
+// COUNTS
+document.getElementById("totalCount").textContent = players.length;
+document.getElementById("batsmanCount").textContent = batsman;
+document.getElementById("bowlerCount").textContent = bowler;
+document.getElementById("allrounderCount").textContent = allrounder;
+
+// PDF DOWNLOAD
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y = 10;
+
+  pdf.setFontSize(16);
+  pdf.text("JP Boy's Cricketer's - Registered Players", 10, y);
+  y += 10;
+
+  players.forEach((p, i) => {
+    pdf.setFontSize(12);
+    pdf.text(`${i + 1}. ${p.name}`, 10, y);
+    y += 6;
+    pdf.text(`Mobile: ${p.mobile}`, 10, y);
+    y += 6;
+    pdf.text(`Role: ${p.role}`, 10, y);
+    y += 8;
+
+    if (p.photo && p.photo.startsWith("data:image")) {
+      pdf.addImage(p.photo, "JPEG", 140, y - 20, 30, 30);
+    }
+
+    if (y > 260) {
+      pdf.addPage();
+      y = 10;
+    }
+  });
+
+  pdf.save("registered_players.pdf");
+}
+
+// set to "admin" only for admin login
+const role = "user"; 
+
+
+if (role === "admin") {
+  document.getElementById("adminBtn").style.display = "inline-block";
+}
+
+</script>
+
+
+
+</body>
+</html>
