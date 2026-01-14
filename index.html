@@ -372,7 +372,7 @@ function hideCountdown(){
 
 
 
-<script>
+<!-- <script>
 const NAMESPACE = "jpboyscricketers";
 const KEY = "website_visits";
 
@@ -390,8 +390,24 @@ function loadVisits() {
 // Increase only once per page load
 fetch(`https://kolurumesh-kb.github.io/JP-Boy-s-Cricketer-s/index.html`);
 loadVisits();
-</script>
+</script> -->
 
+<script>
+function updateVisits() {
+  let visits = localStorage.getItem("jp_visits");
+
+  if (!visits) {
+    visits = 1;
+  } else {
+    visits = parseInt(visits) + 1;
+  }
+
+  localStorage.setItem("jp_visits", visits);
+  document.getElementById("liveVisits").innerText = visits;
+}
+
+updateVisits();
+</script>
 
 
 
