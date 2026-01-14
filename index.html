@@ -393,25 +393,28 @@ loadVisits();
 </script> -->
 
 <script>
-function updateVisits() {
-  let visits = localStorage.getItem("jp_visits");
+const VISIT_KEY = "jp_unique_visitor";
+const COUNT_KEY = "jp_total_visits";
 
-  if (!visits) {
-    visits = 1;
-  } else {
-    visits = parseInt(visits) + 1;
+function updateVisits() {
+  // Get total visits
+  let total = localStorage.getItem(COUNT_KEY);
+  total = total ? parseInt(total) : 0;
+
+  // Check if this device already counted
+  const alreadyVisited = localStorage.getItem(VISIT_KEY);
+
+  if (!alreadyVisited) {
+    total += 1;
+    localStorage.setItem(COUNT_KEY, total);
+    localStorage.setItem(VISIT_KEY, "true");
   }
 
-  localStorage.setItem("jp_visits", visits);
-  document.getElementById("liveVisits").innerText = visits;
+  document.getElementById("liveVisits").innerText = total;
 }
 
 updateVisits();
 </script>
-
-
-
-
 
 
 </body>
