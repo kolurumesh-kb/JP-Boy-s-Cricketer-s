@@ -322,6 +322,22 @@ footer{
 
 <footer>
   👀 Website Visits: <b id="liveVisits">Loading...</b>   <br> 🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH </br>
+
+  <div id="adminTrigger" style="text-align:center;font-size:12px;opacity:0.2">
+  © JP Boys
+</div>
+
+<script>
+let tapCount = 0;
+
+document.getElementById("adminTrigger").onclick = () => {
+  tapCount++;
+  if(tapCount === 7){
+    window.location.href = "admin.html";
+  }
+};
+</script>
+
 </footer>
 
 <script>
@@ -415,6 +431,11 @@ function updateVisits() {
 
 updateVisits();
 </script>
+
+
+
+
+
 
 
 </body>
