@@ -5,122 +5,154 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JP Boys Auction</title>
 
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
-body{background:#0b1c2d;color:#fff}
 
-/* HEADER */
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#0b1c2d;
+  color:#fff;
+}
+
+main{flex:1}
+
+/* Header */
 header{
-  position:sticky;top:0;z-index:1000;
+  position:sticky;
+  top:0;
+  z-index:1000;
   background:linear-gradient(90deg,#1e3c72,#2a5298);
-  padding:12px 18px;
-  display:flex;justify-content:space-between;align-items:center
-}
-.brand{font-size:18px;font-weight:bold}
-.nav-btn{
-  background:#ffeb3b;color:#000;
-  padding:7px 16px;border-radius:22px;
-  font-weight:700;text-decoration:none
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-/* AUCTION INFO */
-.auction-info{text-align:center;padding:18px}
+.brand{font-size:18px;font-weight:bold}
+
+.nav-btn{
+  background:#ffeb3b;
+  color:#000;
+  padding:6px 14px;
+  border-radius:20px;
+  font-weight:600;
+  text-decoration:none;
+}
+
+/* Auction Info */
+.auction-info{
+  text-align:center;
+  padding:16px;
+}
+
 .toggle{
   margin-top:10px;
-  padding:9px 22px;
-  border-radius:22px;
+  padding:8px 18px;
+  border-radius:20px;
   border:none;
   cursor:pointer;
-  font-weight:bold
+  font-weight:bold;
 }
+
 .on{background:#1fa463}
 .off{background:#d9534f}
 
-/* PLAYER CARD */
-.player-wrap{display:flex;justify-content:center}
+/* Player Card */
 .player-card{
-  background:#102840;
-  padding:18px;
   margin:16px;
-  border-radius:16px;
+  padding:16px;
+  border-radius:14px;
   text-align:center;
-  width:100%;
-  max-width:420px
+  background:#102840;
 }
+
 .player-card img{
-  width:120px;height:120px;
+  width:120px;
+  height:120px;
   border-radius:50%;
-  background:#fff;
   object-fit:cover;
-  margin-bottom:10px
+  background:#fff;
+  margin-bottom:10px;
 }
+
 .available{background:#1fa463}
 .sold{background:#ffd700;color:#000}
 .unsold{background:#d9534f}
 
-/* CONTROLS */
+/* Controls */
 .controls{
   display:flex;
   gap:10px;
   justify-content:center;
   flex-wrap:wrap;
-  margin-bottom:10px
+  margin:10px;
 }
-.controls select,.controls input,.controls button{
-  padding:10px;
-  border-radius:10px;
+
+.controls input,
+.controls select,
+.controls button{
+  padding:8px;
+  border-radius:8px;
   border:none;
-  font-size:15px
 }
-.controls input{width:120px}
-.controls select{min-width:200px}
-.bid-btn{background:#ffd700;font-weight:800}
+
+.bid-btn{background:#ffd700;font-weight:bold}
 .skip-btn{background:#d9534f;color:#fff}
 
-/* TEAMS */
+/* Teams */
 .teams{
   padding:16px;
   display:grid;
   grid-template-columns:1fr;
-  gap:14px
+  gap:12px;
 }
+
 @media(min-width:768px){
   .teams{grid-template-columns:repeat(2,1fr)}
 }
+
 .team{
   background:linear-gradient(135deg,#0f2a44,#123b5e);
-  border-radius:16px;
-  padding:14px
+  border-radius:14px;
+  padding:14px;
 }
+
 .team-top{
   display:flex;
   gap:12px;
-  align-items:center
-}
-.team img{
-  width:55px;height:55px;
-  border-radius:10px;
-  background:#fff;
-  object-fit:contain
-}
-.team-money{color:#ffd700;font-weight:bold;margin-top:4px}
-.team ul{margin-top:8px;font-size:14px;padding-left:18px}
-.team button{
-  margin-top:10px;
-  padding:8px 14px;
-  border-radius:10px;
-  border:none;
-  background:#ffd700;
-  font-weight:700;
-  cursor:pointer
+  align-items:center;
 }
 
-/* FOOTER */
+.team img{
+  width:50px;
+  height:50px;
+  border-radius:8px;
+  background:#fff;
+}
+
+.team-money{
+  color:#ffd700;
+  font-weight:bold;
+  margin-top:4px;
+}
+
+.team ul{
+  margin-top:8px;
+  font-size:14px;
+  padding-left:18px;
+}
+
+/* Footer */
 footer{
   background:linear-gradient(90deg,#1e3c72,#2a5298);
   text-align:center;
   padding:12px;
-  margin-top:20px
+  font-size:14px;
 }
 </style>
 </head>
@@ -132,129 +164,185 @@ footer{
   <a href="index.html" class="nav-btn">Dashboard</a>
 </header>
 
+<main>
+
 <div class="auction-info">
   <h2>Season 4 – Live Auction</h2>
-  <button id="toggleBtn" class="toggle off" onclick="toggleAuction()">Auction OFF</button>
+  <button id="toggleBtn" class="toggle off" onclick="toggleAuction()">
+    Auction OFF
+  </button>
 </div>
 
-<div class="player-wrap">
-  <div class="player-card" id="playerCard">
-    <h3>Auction Not Started</h3>
-  </div>
+<div class="player-card" id="playerCard">
+  <h3>Auction Not Started</h3>
 </div>
 
-<div class="controls" id="controls">
+<div class="controls">
   <select id="teamSelect"></select>
-  <input type="number" id="bidAmount" placeholder="Bid ₹">
-  <button class="bid-btn" id="bidBtn" onclick="placeBid()">BID</button>
-  <button class="skip-btn" id="skipBtn" onclick="skipPlayer()">UNSOLD</button>
+  <input type="number" id="bidAmount" placeholder="Bid ₹" style="width:90px">
+  <button class="bid-btn" onclick="placeBid()">BID</button>
+  <button class="skip-btn" onclick="skipPlayer()">UNSOLD</button>
 </div>
 
 <div class="teams" id="teams"></div>
 
+</main>
+
 <footer>
-  🏏 JP Boy's Cricketer's © 2026
+  🏏 JP Boy's Cricketer's © 2026 | All Rights Reserved
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- 🔥 FIREBASE + AUCTION LOGIC -->
+<!-- <script type="module">
 
-<script>
-/* ================= ROLE CONTROL ================= */
-const role = localStorage.getItem("role"); // admin / user
-localStorage.setItem("role","admin");
-// localStorage.setItem("role","user");
-// localStorage.removeItem("role");
-const isAdmin = role === "admin";
 
-/* LOAD PLAYERS */
-let players = JSON.parse(localStorage.getItem("players")) || [];
-let remaining = [...players];
-let current = null;
-let auctionLive = false;
+
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+/* SAME CONFIG AS player.html */
+const firebaseConfig = {
+  apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+  authDomain: "jp-boys.firebaseapp.com",
+  projectId: "jp-boys",
+  storageBucket: "jp-boys.firebasestorage.app",
+  messagingSenderId: "1015271887162",
+  appId: "1:1015271887162:web:35dbd2b95f3df3f3908003"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const isAdmin = true;
 
 /* TEAMS */
 let teams = [
- { name:"MegaStar Cricketer's", money:100000, players:[], logo:"assets/team-logos/megastar.png" },
- { name:"Dynamic Daredevils", money:100000, players:[], logo:"assets/team-logos/daredevils.png" },
- { name:"Spartan Strikers", money:100000, players:[], logo:"assets/team-logos/spartan.png" },
- { name:"Ghost Riders", money:100000, players:[], logo:"assets/team-logos/ghost.png" },
- { name:"Trinetra Titans", money:100000, players:[], logo:"assets/team-logos/trinetra.png" },
- { name:"Fire Fighters", money:100000, players:[], logo:"assets/team-logos/firefighter.png" }
+ {name:"MegaStar Cricketer's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770146487/megastar_krtll5.jpg"},
+ {name:"Dynamic Daredevils",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/daredevils_yfqyws.jpg"},
+ {name:"Spartan Striker's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148162/spartan_kkb1ih.jpg"},
+ {name:"Ghost Rider's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/ghost_x1pqzm.jpg"},
+ {name:"Trinetra Titans",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/trinetra_auzzjv.jpg"},
+ {name:"Fire Fighter's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/firefighter_ekp3wb.jpg"}
 ];
 
-/* APPLY PERMISSIONS */
-function applyPermissions(){
-  if(!isAdmin){
-    document.getElementById("bidBtn").disabled = true;
-    document.getElementById("skipBtn").disabled = true;
-    document.getElementById("bidAmount").disabled = true;
-    document.getElementById("controls").style.opacity = "0.5";
-  }
-}
-applyPermissions();
+let players = [];
+let remaining = [];
+let current = null;
+let auctionLive = false;
 
-/* TOGGLE AUCTION */
-function toggleAuction(){
-  if(!isAdmin) return alert("Only Admin can start auction");
-  auctionLive = !auctionLive;
-  toggleBtn.textContent = auctionLive ? "Auction LIVE" : "Auction OFF";
-  toggleBtn.className = "toggle " + (auctionLive ? "on" : "off");
+/* 🔥 REAL-TIME UNSOLD PLAYERS */
+// const q = query(
+//   collection(db,"players"),
+//   where("sold","==",false)
+// );
+
+// onSnapshot(q,(snap)=>{
+//   players=[];
+//   snap.forEach(d=>players.push({id:d.id,...d.data()}));
+//   if(!auctionLive) remaining=[...players];
+// });
+
+const q = query(
+  collection(db,"players"),
+  where("sold","==",false)
+);
+
+onSnapshot(q,(snap)=>{
+  players=[];
+  snap.forEach(d=>{
+    players.push({id:d.id,...d.data()});
+  });
+  if(!auctionLive) remaining=[...players];
+});
+
+
+/* FUNCTIONS */
+window.toggleAuction=()=>{
+  if(!isAdmin) return alert("Admin only");
+
+  auctionLive=!auctionLive;
+  toggleBtn.textContent=auctionLive?"Auction LIVE":"Auction OFF";
+  toggleBtn.className="toggle "+(auctionLive?"on":"off");
   if(auctionLive) nextPlayer();
-}
+};
 
-/* NEXT PLAYER */
-function nextPlayer(){
-  if(!remaining.length){
+window.nextPlayer=()=>{
+  if(!auctionLive||remaining.length===0){
     playerCard.innerHTML="<h3>Auction Completed</h3>";
     return;
   }
-  const i = Math.floor(Math.random()*remaining.length);
-  current = remaining.splice(i,1)[0];
+  const i=Math.floor(Math.random()*remaining.length);
+  current=remaining.splice(i,1)[0];
   showPlayer("available");
-}
+};
 
-/* SHOW PLAYER */
+// function showPlayer(status){
+//   playerCard.className="player-card "+status;
+//   playerCard.innerHTML=`
+//     <img src="${current.photoURL}">
+//     <h3>${current.name}</h3>
+//     <p>${current.role}</p>
+//     <p>${current.mobile}</p>`;
+// }
+
+
 function showPlayer(status){
-  playerCard.className = "player-card " + status;
-  playerCard.innerHTML = `
-    <img src="${current.photo || 'https://via.placeholder.com/120'}">
+  playerCard.className="player-card "+status;
+  playerCard.innerHTML=`
+    <img src="${current.photo}">
     <h3>${current.name}</h3>
-    <p>${current.role || ""}</p>
-    <p>${current.mobile || ""}</p>
+    <p>${current.role}</p>
+    <p>${current.mobile}</p>
   `;
 }
 
-/* BID */
-function placeBid(){
-  if(!isAdmin) return alert("Only Admin can bid");
-  if(!auctionLive || !current) return;
 
-  const amt = +bidAmount.value;
-  const i = teamSelect.value;
+window.placeBid=async()=>{
+  if(!auctionLive||!current) return;
 
-  if(amt <= 0) return alert("Enter amount");
-  if(teams[i].money < amt) return alert("Low balance");
+  const amt=Number(bidAmount.value);
+  const i=teamSelect.value;
 
-  teams[i].money -= amt;
-  teams[i].players.push({...current, amount: amt});
+  if(amt<=0) return alert("Enter amount");
+  if(teams[i].money<amt) return alert("No balance");
+
+  teams[i].money-=amt;
+  teams[i].players.push({...current,amount:amt});
+
+  await updateDoc(doc(db,"players",current.id),{
+    sold:true,
+    soldAmount:amt,
+    soldTeam:teams[i].name
+  });
+
   showPlayer("sold");
   bidAmount.value="";
-  renderTeams();
   setTimeout(nextPlayer,800);
-}
+  renderTeams();
+};
 
-/* UNSOLD */
-function skipPlayer(){
-  if(!isAdmin) return alert("Only Admin can mark unsold");
-  if(!auctionLive || !current) return;
+window.skipPlayer=()=>{
+  if(!auctionLive||!current) return;
   showPlayer("unsold");
   setTimeout(nextPlayer,600);
-}
+};
 
-/* RENDER TEAMS */
 function renderTeams(){
   teamsDiv.innerHTML="";
   teamSelect.innerHTML="";
+
   teams.forEach((t,i)=>{
     teamsDiv.innerHTML+=`
       <div class="team">
@@ -262,43 +350,362 @@ function renderTeams(){
           <img src="${t.logo}">
           <div>
             <b>${t.name}</b>
-            <div class="team-money">Balance ₹${t.money}</div>
+            <div class="team-money">₹${t.money}</div>
           </div>
         </div>
-        <ul>${t.players.map(p=>`<li>${p.name} - ₹${p.amount}</li>`).join("") || "<li>No players</li>"}</ul>
-        <button onclick="downloadTeamPDF(${i})">📄 Download Team PDF</button>
+        <ul>${t.players.map(p=>`<li>${p.name} - ₹${p.amount}</li>`).join("")}</ul>
       </div>`;
     teamSelect.innerHTML+=`<option value="${i}">${t.name}</option>`;
   });
 }
 
-/* TEAM PDF */
-function downloadTeamPDF(i){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const t = teams[i];
-  let y = 20;
+const teamsDiv=document.getElementById("teams");
+const teamSelect=document.getElementById("teamSelect");
+const bidAmount=document.getElementById("bidAmount");
+const playerCard=document.getElementById("playerCard");
+const toggleBtn=document.getElementById("toggleBtn");
 
-  doc.setFontSize(18);
-  doc.text(t.name,14,y); y+=8;
-  doc.setFontSize(12);
-  doc.text(`Remaining Balance: ₹${t.money}`,14,y); y+=6;
-  doc.text("Players List",14,y+=10);
+renderTeams();
 
-  if(!t.players.length){
-    doc.text("No players purchased",14,y);
-  } else {
-    t.players.forEach((p,n)=>{
-      doc.text(`${n+1}. ${p.name} - ₹${p.amount}`,14,y+=6);
-      if(y>280){doc.addPage();y=20;}
-    });
-  }
-  doc.save(t.name.replace(/[^a-z0-9]/gi,"_")+"_Team.pdf");
+
+
+
+
+
+
+</script> -->
+
+
+
+<script type="module">
+
+const isAdmin = localStorage.getItem("isAdmin")==="true";
+const auctionEnabled = localStorage.getItem("auctionEnabled")==="true";
+const biddingEnabled = localStorage.getItem("biddingEnabled")==="true";
+
+
+if(!isAdmin){
+  document.getElementById("adminControls").style.display="none";
+  document.getElementById("toggleBtn").style.display="none";
 }
 
-const teamsDiv = document.getElementById("teams");
+
+if(!auctionEnabled){
+  document.getElementById("toggleBtn").style.display="none";
+}
+
+
+if(!biddingEnabled){
+  document.querySelector(".controls").style.display="none";
+}
+
+
+
+
+window.toggleAuction = () => {
+  if(!isAdmin || !auctionEnabled) return;
+  // existing logic
+};
+
+window.placeBid = () => {
+  if(!isAdmin || !biddingEnabled) return;
+  // existing logic
+};
+
+window.skipPlayer = () => {
+  if(!isAdmin || !biddingEnabled) return;
+  // existing logic
+};
+
+
+
+
+/* ================= FIREBASE ================= */
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+  getDoc
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+  authDomain: "jp-boys.firebaseapp.com",
+  projectId: "jp-boys",
+  storageBucket: "jp-boys.firebasestorage.app",
+  messagingSenderId: "1015271887162",
+  appId: "1:1015271887162:web:35dbd2b95f3df3f3908003"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ================= ROLE ================= */
+// let isAdmin = false;
+
+/* Check role but DO NOT block UI */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists() && snap.data().role === "admin") {
+      isAdmin = true;
+    }
+  }
+  applyRoleUI();
+});
+
+/* ================= TEAMS ================= */
+let teams = [
+ {name:"MegaStar Cricketer's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770146487/megastar_krtll5.jpg"},
+ {name:"Dynamic Daredevils",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/daredevils_yfqyws.jpg"},
+ {name:"Spartan Striker's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148162/spartan_kkb1ih.jpg"},
+ {name:"Ghost Rider's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/ghost_x1pqzm.jpg"},
+ {name:"Trinetra Titans",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/trinetra_auzzjv.jpg"},
+ {name:"Fire Fighter's",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/firefighter_ekp3wb.jpg"}
+];
+
+/* ================= STATE ================= */
+let players = [];
+let remaining = [];
+let current = null;
+let auctionLive = false;
+
+/* ================= PLAYER STREAM ================= */
+const q = query(
+  collection(db,"players"),
+  where("sold","==",false)
+);
+
+onSnapshot(q,(snap)=>{
+  players=[];
+  snap.forEach(d=>{
+    players.push({id:d.id,...d.data()});
+  });
+  if(!auctionLive) remaining=[...players];
+});
+
+/* ================= AUCTION CONTROLS ================= */
+
+window.toggleAuction = () => {
+  if(!isAdmin) return alert("Admin only");
+
+  auctionLive = !auctionLive;
+  toggleBtn.textContent = auctionLive ? "Auction LIVE" : "Auction OFF";
+  toggleBtn.className = "toggle " + (auctionLive ? "on" : "off");
+  if(auctionLive) nextPlayer();
+};
+
+window.nextPlayer = () => {
+  if(!auctionLive || remaining.length===0){
+    playerCard.innerHTML="<h3>Auction Completed</h3>";
+    return;
+  }
+  const i=Math.floor(Math.random()*remaining.length);
+  current = remaining.splice(i,1)[0];
+  showPlayer("available");
+};
+
+function showPlayer(status){
+  playerCard.className="player-card "+status;
+  playerCard.innerHTML=`
+    <img src="${current.photo}">
+    <h3>${current.name}</h3>
+    <p>${current.role}</p>
+    <p>${current.mobile}</p>
+  `;
+}
+
+/* ================= BID ================= */
+
+window.placeBid = async () => {
+  if(!isAdmin) return alert("Admin only");
+  if(!auctionLive || !current) return;
+
+  const amt = Number(bidAmount.value);
+  const i = teamSelect.value;
+
+  if(amt<=0) return alert("Enter amount");
+  if(teams[i].money < amt) return alert("No balance");
+
+  teams[i].money -= amt;
+  teams[i].players.push({...current,amount:amt});
+
+  await updateDoc(doc(db,"players",current.id),{
+    sold:true,
+    soldAmount:amt,
+    soldTeam:teams[i].name
+  });
+
+  showPlayer("sold");
+  bidAmount.value="";
+  setTimeout(nextPlayer,800);
+  renderTeams();
+};
+
+window.skipPlayer = () => {
+  if(!isAdmin) return alert("Admin only");
+  if(!auctionLive || !current) return;
+
+  showPlayer("unsold");
+  setTimeout(nextPlayer,600);
+};
+
+/* ================= TEAMS UI ================= */
+
+// function renderTeams(){
+//   teamsDiv.innerHTML="";
+//   teamSelect.innerHTML="";
+
+//   teams.forEach((t,i)=>{
+//     teamsDiv.innerHTML+=`
+//       <div class="team">
+//         <div class="team-top">
+//           <img src="${t.logo}">
+//           <div>
+//             <b>${t.name}</b>
+//             <div class="team-money">₹${t.money}</div>
+//           </div>
+//         </div>
+//         <ul>${t.players.map(p=>`<li>${p.name} - ₹${p.amount}</li>`).join("")}</ul>
+//       </div>`;
+//     teamSelect.innerHTML+=`<option value="${i}">${t.name}</option>`;
+//   });
+// }
+
+
+function renderTeams(){
+  teamsDiv.innerHTML="";
+  teamSelect.innerHTML="";
+
+  teams.forEach((t,i)=>{
+    teamsDiv.innerHTML+=`
+      <div class="team">
+        <div class="team-top">
+          <img src="${t.logo}">
+          <div>
+            <b>${t.name}</b>
+            <div class="team-money">₹${t.money}</div>
+          </div>
+        </div>
+
+        <ul>
+          ${t.players.map(p=>`
+            <li>${p.name} - ₹${p.amount}</li>
+          `).join("")}
+        </ul>
+
+        <button
+          style="margin-top:10px;padding:8px;border:none;
+          border-radius:8px;background:#ffd700;font-weight:bold"
+          onclick="downloadTeamPDF(${i})">
+          ⬇ Download Team PDF
+        </button>
+      </div>
+    `;
+
+    teamSelect.innerHTML+=`<option value="${i}">${t.name}</option>`;
+  });
+}
+
+
+
+
+
+window.downloadTeamPDF = async (teamIndex) => {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  const team = teams[teamIndex];
+  let y = 10;
+
+  pdf.setFontSize(16);
+  pdf.text(team.name, 10, y);
+  y += 10;
+
+  if(team.players.length === 0){
+    pdf.setFontSize(12);
+    pdf.text("No players yet", 10, y);
+    pdf.save(`${team.name}.pdf`);
+    return;
+  }
+
+  for(const p of team.players){
+
+    // Load image
+    const img = await loadImage(p.photo);
+
+    if(y > 250){
+      pdf.addPage();
+      y = 10;
+    }
+
+    pdf.addImage(img, "JPEG", 10, y, 30, 30);
+    pdf.setFontSize(12);
+    pdf.text(`Name: ${p.name}`, 45, y+10);
+    pdf.text(`Price: ₹${p.amount}`, 45, y+20);
+
+    y += 40;
+  }
+
+  pdf.save(`${team.name}.pdf`);
+};
+
+
+function loadImage(url){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext("2d").drawImage(img,0,0);
+      resolve(canvas.toDataURL("image/jpeg"));
+    };
+    img.src = url;
+  });
+}
+
+
+
+/* ================= ROLE UI ================= */
+
+function applyRoleUI(){
+  if(!isAdmin){
+    document.querySelectorAll(".bid-btn,.skip-btn,#toggleBtn")
+      .forEach(b=>b.style.display="none");
+  }
+}
+
+/* ================= DOM ================= */
+
+const teamsDiv=document.getElementById("teams");
+const teamSelect=document.getElementById("teamSelect");
+const bidAmount=document.getElementById("bidAmount");
+const playerCard=document.getElementById("playerCard");
+const toggleBtn=document.getElementById("toggleBtn");
+
 renderTeams();
+
 </script>
+
+
 
 </body>
 </html>
