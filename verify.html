@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Receipt Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  background:#0b1c2d;
+  color:#fff;
+  font-family:Segoe UI;
+}
+
+/* HEADER */
+.header{
+  background:linear-gradient(90deg,#1e3c72,#2a5298);
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.header h2{
+  margin:0;
+  font-size:18px;
+}
+.dashboard-btn{
+  background:#ffcc00;
+  color:#000;
+  border:none;
+  padding:8px 14px;
+  border-radius:20px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* CONTENT */
+.container{
+  padding:20px;
+}
+.card{
+  background:#102840;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+}
+.card img{
+  max-width:260px;
+  border-radius:10px;
+  margin-top:10px;
+}
+.status{
+  margin-top:8px;
+  font-weight:bold;
+}
+.pending{color:orange}
+.verified{color:#5cb85c}
+.rejected{color:#d9534f}
+
+button.verify{
+  background:#5cb85c;
+}
+button.reject{
+  background:#d9534f;
+}
+.action-btn{
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  color:#fff;
+  margin-right:10px;
+  cursor:pointer;
+}
+
+/* FOOTER */
+.footer{
+  background:linear-gradient(90deg,#1e3c72,#2a5298);
+  padding:10px;
+  text-align:center;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h2 >🧾 Receipt Verification</h2>
+  <button class="dashboard-btn"
+    onclick="location.href='index.html'">
+    Dashboard
+  </button>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+  <div id="list"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  JP Boy's Cricketers © 2026 | Designed by K B Umesh
+</div>
+
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, doc, updateDoc
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+/* FIREBASE */
+const app = initializeApp({
+  apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+  authDomain: "jp-boys.firebaseapp.com",
+  projectId: "jp-boys"
+});
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+function statusClass(s){
+  if(s === "verified") return "verified";
+  if(s === "rejected") return "rejected";
+  return "pending";
+}
+
+async function load(){
+  list.innerHTML = "";
+  const snap = await getDocs(collection(db,"players"));
+
+  snap.forEach(d=>{
+    const p = d.data();
+    const status = p.verified || "pending";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>${p.name}</h3>
+      <img src="${p.receipt}">
+      <div class="status ${statusClass(status)}">
+        Status: ${status.toUpperCase()}
+      </div>
+      <div style="margin-top:12px">
+        <button class="action-btn verify">VERIFY</button>
+        <button class="action-btn reject">REJECT</button>
+      </div>
+    `;
+
+    card.querySelector(".verify").onclick = async()=>{
+      await updateDoc(doc(db,"players",d.id),{
+        verified:"verified"
+      });
+      load();
+    };
+
+    card.querySelector(".reject").onclick = async()=>{
+      await updateDoc(doc(db,"players",d.id),{
+        verified:"rejected"
+      });
+      load();
+    };
+
+    list.appendChild(card);
+  });
+}
+
+load();
+</script>
+
+
+
+</body>
+</html>
