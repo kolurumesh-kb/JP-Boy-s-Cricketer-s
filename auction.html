@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -546,11 +547,12 @@ window.placeBid = async () => {
   teams[i].money -= amt;
   teams[i].players.push({...current,amount:amt});
 
-  await updateDoc(doc(db,"players",current.id),{
-    sold:true,
-    soldAmount:amt,
-    soldTeam:teams[i].name
-  });
+ await updateDoc(doc(db,"players",current.id),{
+  sold: true,
+  soldAmount: amt,
+  soldTeam: teams[i].name,
+  soldAt: Date.now()   // ⭐ IMPORTANT
+});
 
   showPlayer("sold");
   bidAmount.value="";
