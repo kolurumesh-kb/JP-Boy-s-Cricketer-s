@@ -1,11 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registered Players</title>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -73,7 +73,21 @@ header a{
   cursor:pointer;
 }
 
-/* Player Cards */
+/* STATUS NOTE BOX */
+.status-note{
+  margin-top:16px;
+  background:#102840;
+  border-radius:12px;
+  padding:12px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.green{color:#28a745}
+.red{color:#dc3545}
+.yellow{color:#ffc107}
+
+/* Player Cards Layout */
 #players{
   padding:16px;
   display:grid;
@@ -85,6 +99,7 @@ header a{
   #players{grid-template-columns:repeat(2,1fr)}
 }
 
+/* BASE CARD */
 .player-card{
   background:#102840;
   border-radius:14px;
@@ -92,6 +107,7 @@ header a{
   display:flex;
   gap:12px;
   align-items:center;
+  transition:background 0.5s ease, box-shadow 0.5s ease;
 }
 
 .player-card img{
@@ -100,14 +116,54 @@ header a{
   border-radius:50%;
   object-fit:cover;
   background:#fff;
+  transition:border 0.5s ease;
 }
+
+/* STATUS COLORS */
+.player-card.verified{
+  background:#123d2b;
+  box-shadow:0 0 10px #28a745;
+}
+.player-card.rejected{
+  background:#3d1212;
+  box-shadow:0 0 10px #dc3545;
+}
+.player-card.pending{
+  background:#3d3412;
+  box-shadow:0 0 10px #ffc107;
+}
+
+.player-card.verified img{ border:3px solid #28a745; }
+.player-card.rejected img{ border:3px solid #dc3545; }
+.player-card.pending img{ border:3px solid #ffc107; }
+
+/* ⭐ SMOOTH GLOW ANIMATION */
+@keyframes glowGreen{
+  0%{box-shadow:0 0 0px #28a745;}
+  50%{box-shadow:0 0 25px #28a745;}
+  100%{box-shadow:0 0 10px #28a745;}
+}
+@keyframes glowRed{
+  0%{box-shadow:0 0 0px #dc3545;}
+  50%{box-shadow:0 0 25px #dc3545;}
+  100%{box-shadow:0 0 10px #dc3545;}
+}
+@keyframes glowYellow{
+  0%{box-shadow:0 0 0px #ffc107;}
+  50%{box-shadow:0 0 25px #ffc107;}
+  100%{box-shadow:0 0 10px #ffc107;}
+}
+
+.glow-verified{animation:glowGreen 1s ease;}
+.glow-rejected{animation:glowRed 1s ease;}
+.glow-pending{animation:glowYellow 1s ease;}
 
 .player-info p{
   font-size:14px;
   margin-top:2px;
 }
 
-
+/* Footer */
 footer{
   position:fixed;
   bottom:0;
@@ -120,25 +176,11 @@ footer{
   z-index:1000;
 }
 
-/* prevent content hiding behind footer */
 #players{
   padding-bottom:70px;
 }
-
-
-
-.delete-btn{
-  background:red;
-  color:greenyellow;
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-
-
 </style>
+
 </head>
 
 <body>
@@ -148,7 +190,6 @@ footer{
   <a href="index.html">Dashboard</a>
 </header>
 
-<!-- STATS SECTION -->
 <section id="playerStats">
   <h3>Player Statistics</h3>
 
@@ -162,12 +203,18 @@ footer{
   <button class="download-btn" onclick="downloadAllPlayersPDF()">
     ⬇ Download All Players PDF
   </button>
+
+  <div class="status-note">
+    <label>Player Verification Status : </label>
+    <div><span class="green">🟢 Green </span> → Verified ( Enrolled for Auction )</div>
+    <div><span class="red">🔴 Red</span> → Rejected ( Not Available for Auction )</div>
+    <div><span class="yellow">🟡 Yellow </span> → Pending ( Waiting for Action to take )</div>
+  </div>
+
 </section>
 
-<!-- PLAYER LIST -->
 <section id="players"></section>
 
-<!-- FIREBASE + LOGIC -->
 <script type="module">
 
 import { initializeApp } from
@@ -180,7 +227,6 @@ import {
 } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
   authDomain: "jp-boys.firebaseapp.com",
@@ -195,16 +241,17 @@ const db = getFirestore(app);
 
 const playersDiv = document.getElementById("players");
 let players = [];
+let previousStatus = {};
 
-/* 🔄 REAL-TIME LOAD PLAYERS */
 onSnapshot(collection(db,"players"), snap=>{
   players = [];
-  snap.forEach(d=>players.push(d.data()));
+  snap.forEach(d=>{
+    players.push(d.data());
+  });
   updateCounts();
   renderPlayers();
 });
 
-/* 📊 UPDATE COUNTS */
 function updateCounts(){
   totalCount.textContent = players.length;
   batCount.textContent = players.filter(p=>p.role==="Batsman").length;
@@ -212,24 +259,35 @@ function updateCounts(){
   allCount.textContent = players.filter(p=>p.role==="All-Rounder").length;
 }
 
-/* 👤 RENDER PLAYER LIST */
 function renderPlayers(){
   playersDiv.innerHTML="";
+
   players.forEach(p=>{
-    playersDiv.innerHTML+=`
-      <div class="player-card">
+    const status = p.verified || "pending";
+
+    const card=document.createElement("div");
+    card.className=`player-card ${status}`;
+
+    /* Detect status change -> add glow */
+    if(previousStatus[p.mobile] && previousStatus[p.mobile]!==status){
+      card.classList.add(`glow-${status}`);
+    }
+    previousStatus[p.mobile]=status;
+
+    card.innerHTML=`
         <img src="${p.photo}">
         <div class="player-info">
           <b>${p.name}</b>
           <p>📞 ${p.mobile}</p>
           <p>Role: ${p.role}</p>
         </div>
-      </div>
     `;
+
+    playersDiv.appendChild(card);
   });
 }
 
-/* 📄 PDF DOWNLOAD */
+/* PDF (unchanged) */
 window.downloadAllPlayersPDF = async () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
@@ -252,7 +310,6 @@ window.downloadAllPlayersPDF = async () => {
     pdf.text(`Name: ${p.name}`,40,y+6);
     pdf.text(`Mobile: ${p.mobile}`,40,y+12);
     pdf.text(`Role: ${p.role}`,40,y+18);
-    
 
     y += 34;
   }
@@ -260,7 +317,6 @@ window.downloadAllPlayersPDF = async () => {
   pdf.save("All_Registered_Players.pdf");
 };
 
-/* 🖼️ IMAGE HELPER */
 function loadImage(url){
   return new Promise(resolve=>{
     const img = new Image();
@@ -276,34 +332,10 @@ function loadImage(url){
   });
 }
 
-
-// <button class="delete-btn" onclick="deletePlayer('PLAYER_ID')">
-//   DELETE
-// </button>
-
-
-
-// window.deletePlayer = async (id) => {
-//   if(localStorage.getItem("isAdmin") !== "true") return;
-
-//   if(!confirm("Delete player and allow fresh registration?")) return;
-
-//   await deleteDoc(doc(db,"players",id));
-
-//   alert("Player deleted. User can register again.");
-// };
-
-
 </script>
 
-
-
-
-
-
-
 <footer>
-  🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
+🏏 JP Boy's Cricketer's © 2026 | Designed by K B UMESH
 </footer>
 
 </body>
