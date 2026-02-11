@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +38,7 @@ button{
 button.green{background:green;color:#fff}
 button.yellow{background:#ffd700}
 button.red{background:#d9534f;color:#fff}
+button.blue{background:#3498db;color:#fff}
 
 input[type="password"],
 input[type="email"]{
@@ -48,11 +50,11 @@ input[type="email"]{
 }
 input[type="email"]{background:orange}
 </style>
+
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div class="box" id="loginBox">
   <h3>Admin Login</h3>
   <input type="email" id="id" placeholder="Admin email">
@@ -60,89 +62,51 @@ input[type="email"]{background:orange}
   <button class="green" onclick="login()">Login</button>
 </div>
 
-<!-- CONTROL -->
 <div class="box" id="controlBox" style="display:none">
   <h3>Auction Control</h3>
 
-  <label>
-    Auction ON
-    <input type="checkbox" id="auctionToggle">
-  </label>
+<label>Auction ON <input type="checkbox" id="auctionToggle"></label> <label>Bidding Enabled <input type="checkbox" id="bidToggle"></label> <label>Enable Player Reset <input type="checkbox" id="resetToggle"></label>
 
-  <label>
-    Bidding Enabled
-    <input type="checkbox" id="bidToggle">
-  </label>
+<!-- ⭐ NEW OWNER EDIT TOGGLE -->
 
-  <label>
-    Enable Player Reset
-    <input type="checkbox" id="resetToggle">
-  </label>
+<label>Owner Editing <input type="checkbox" id="ownerToggle"></label>
 
-  <button class="yellow" onclick="goVerify()" style="margin-top:12px">
-    Verify Payments
-  </button>
+<button class="yellow" onclick="goVerify()">Verify Payments</button> <button class="green" onclick="goAuction()">Go to Auction</button>
 
-  <button class="green" onclick="goAuction()" style="margin-top:10px">
-    Go to Auction
-  </button>
+<button onclick="clearSoldPlayers()">Clear Sold Players</button> <button class="red" onclick="resetAllPlayers()">RESET ALL PLAYERS</button> <button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
 
-  <!-- 🔥 NEW RESET ALL PLAYERS BUTTON -->
-  <button class="red" style="margin-top:14px"
-    onclick="resetAllPlayers()">
-    RESET ALL PLAYERS
-  </button>
 </div>
 
-<!-- LOCAL STORAGE FLAGS -->
 <script>
 document.getElementById("resetToggle").onchange = e =>
   localStorage.setItem("playerResetEnabled", e.target.checked);
 
 document.getElementById("resetToggle").checked =
   localStorage.getItem("playerResetEnabled") === "true";
-</script>
 
-<!-- ADMIN LOGIN + TOGGLES -->
-<script>
 const ADMIN_PASSWORD = "Umesh@09";
 
 function login(){
   if(document.getElementById("pwd").value === ADMIN_PASSWORD){
     localStorage.setItem("isAdmin","true");
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("controlBox").style.display="block";
+    loginBox.style.display="none";
+    controlBox.style.display="block";
     loadFlags();
-  }else{
-    alert("Wrong password");
-  }
+  }else alert("Wrong password");
 }
-
-
 
 function loadFlags(){
-  document.getElementById("auctionToggle").checked =
-    localStorage.getItem("auctionEnabled")==="true";
-  document.getElementById("bidToggle").checked =
-    localStorage.getItem("biddingEnabled")==="true";
+  auctionToggle.checked=localStorage.getItem("auctionEnabled")==="true";
+  bidToggle.checked=localStorage.getItem("biddingEnabled")==="true";
 }
 
-document.getElementById("auctionToggle").onchange = e =>
-  localStorage.setItem("auctionEnabled", e.target.checked);
+auctionToggle.onchange=e=>localStorage.setItem("auctionEnabled",e.target.checked);
+bidToggle.onchange=e=>localStorage.setItem("biddingEnabled",e.target.checked);
 
-document.getElementById("bidToggle").onchange = e =>
-  localStorage.setItem("biddingEnabled", e.target.checked);
-
-function goAuction(){
-  window.location.href="auction.html";
-}
-
-function goVerify(){
-  window.location.href="verify.html";
-}
+function goAuction(){ window.location.href="auction.html"; }
+function goVerify(){ window.location.href="verify.html"; }
 </script>
 
-<!-- 🔥 FIREBASE + RESET LOGIC -->
 <script type="module">
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -151,11 +115,12 @@ import {
   collection,
   getDocs,
   deleteDoc,
-  doc
+  doc,
+  updateDoc,
+  setDoc
 } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-/* FIREBASE */
 const app = initializeApp({
   apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
   authDomain: "jp-boys.firebaseapp.com",
@@ -163,25 +128,66 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-/* 🔁 RESET ALL PLAYERS (ADMIN ONLY) */
+/* OWNER EDIT TOGGLE (GLOBAL) */
+ownerToggle.onchange = async e=>{
+ await setDoc(doc(db,"settings","ownerControl"),{
+   editingEnabled:e.target.checked
+ });
+};
+
+/* DELETE ALL PLAYERS */
 window.resetAllPlayers = async () => {
+ if(localStorage.getItem("isAdmin")!=="true") return;
+ if(localStorage.getItem("playerResetEnabled")!=="true"){
+   alert("Enable Player Reset first"); return;
+ }
+ if(!confirm("Delete ALL players?")) return;
 
-  if(localStorage.getItem("isAdmin") !== "true") return;
+ const snap = await getDocs(collection(db,"players"));
+ for(const d of snap.docs){
+   await deleteDoc(doc(db,"players",d.id));
+ }
+ alert("All players deleted.");
+};
 
-  if(localStorage.getItem("playerResetEnabled") !== "true"){
-    alert("Enable Player Reset first");
-    return;
-  }
+/* CLEAR SOLD PLAYERS */
+window.clearSoldPlayers = async () => {
+ const snap = await getDocs(collection(db,"players"));
+ const jobs=[];
+ snap.forEach(d=>{
+   if(d.data().sold===true)
+     jobs.push(deleteDoc(doc(db,"players",d.id)));
+ });
+ await Promise.all(jobs);
+ alert("Sold players cleared");
+};
 
-  if(!confirm("This will DELETE ALL PLAYERS. Continue?")) return;
+/* RESET AUCTION */
+window.resetAuctionSeason = async () => {
+ if(!confirm("Reset balances + sold data?")) return;
 
-  const snap = await getDocs(collection(db,"players"));
+ const teamSnap = await getDocs(collection(db,"teams"));
+ const jobs=[];
 
-  for(const d of snap.docs){
-    await deleteDoc(doc(db,"players",d.id));
-  }
+ teamSnap.forEach(t=>{
+   jobs.push(updateDoc(doc(db,"teams",t.id),{
+     money:100000,
+     players:[]
+   }));
+ });
 
-  alert("All players deleted. Fresh registration enabled.");
+ const playerSnap = await getDocs(collection(db,"players"));
+ playerSnap.forEach(p=>{
+   jobs.push(updateDoc(doc(db,"players",p.id),{
+     sold:false,
+     soldAmount:null,
+     soldTeam:null,
+     soldAt:null
+   }));
+ });
+
+ await Promise.all(jobs);
+ alert("Auction fully reset ✅");
 };
 </script>
 
