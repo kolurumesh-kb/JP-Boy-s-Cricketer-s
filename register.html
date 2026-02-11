@@ -45,6 +45,27 @@ footer{
 
 main{flex:1;padding:16px;padding-bottom:90px}
 
+/* 🔔 ANNOUNCEMENT SECTION */
+.announce{
+  background:linear-gradient(135deg,#102840,#173d61);
+  border-left:6px solid #ffd700;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:16px;
+  box-shadow:0 0 12px rgba(0,0,0,0.35);
+}
+
+.announce h3{
+  margin:0 0 6px 0;
+  color:#ffd700;
+}
+
+.announce h5{
+  margin:0;
+  font-size:14px;
+  color:red;
+}
+
 /* FORM */
 form{
   max-width:420px;
@@ -72,10 +93,7 @@ button{
 }
 
 /* PROFILE PHOTO */
-.photo-box{
-  text-align:center;
-  margin-bottom:10px;
-}
+.photo-box{text-align:center;margin-bottom:10px}
 
 .preview{
   width:120px;
@@ -134,19 +152,29 @@ button{
 <body>
 
 <header>
-  <div >🏏 Player Registration</div>
+  <div>🏏 Player Registration </div>
   <a href="index.html">Dashboard</a>
 </header>
 
 <main>
 
+<!-- 🔔 ANNOUNCEMENT -->
+<div class="announce">
+  <h3>📢 Note : </h3>
+  <h5>
+    Welcome player's! Please complete your registration and upload the payment receipt.
+    Ensure photos are under 1MB. Once Registration is done please check your status in the Player's page.
+  </h5>
+</div>
+
 <form id="regForm">
+
+<!-- <h5 style="color: red;">Note : Please Upload the Photo's Size 1MB only for Profile Photo and Receipt </h5> -->
 
 <div class="upload-text">Upload Profile Photo</div>
 <div class="photo-box">
   <img id="preview" class="preview">
   <input id="photo" type="file" accept="image/*" required>
-  
 </div>
 
 <label>Full Name</label>
@@ -161,6 +189,7 @@ button{
   <option>Batsman</option>
   <option>Bowler</option>
   <option>All-Rounder</option>
+  <option>Wicket -Keeper Batsman</option>
 </select>
 
 <label>Batting</label>
@@ -170,30 +199,28 @@ button{
   <option>Left Hand</option>
 </select>
 
-
 <label>Bowling</label>
 <select id="bowling" required>
   <option value="">Select</option>
   <option>Right Arm</option>
   <option>Left Arm</option>
+  <option>Not a Bowler</option>
 </select>
-
-<!-- <label>Bowling</label>
-<input id="bowling" value="NA"> -->
 
 <label>DOB</label>
 <input id="dob" type="date" required>
 
 <label>Address</label>
-<textarea id="address" placeholder="Enter the address"  required></textarea>
+<textarea id="address" placeholder="Enter the address" required></textarea>
 
-<h3>💳 Payment Section : </h3>
+<h3>💳 Payment Section :</h3>
 
-<label>Pay the Registration Fee Rs.800 Only </label>
-</br>
-<label>Pay Using UPI ID : 8197901199@ybl <br>or </br> Use Below Scanner </label>
+<label>Pay the Registration Fee Rs.800 Only</label>
+<br>
+<label>Pay Using UPI ID : 8197901199@ybl <br>or</br> Use Below Scanner</label>
+
 <div class="qr-box">
-  <img src="assets/images/qr1.png">
+  <img src="/assets/images/qr1.png">
   <p>Upload receipt after payment</p>
 </div>
 
@@ -203,12 +230,10 @@ button{
 <button type="submit">Submit Registration</button>
 
 </form>
-
 </main>
 
 <footer>🏏 JP Boy's Cricketer's © 2026 | Designed By K B UMESH </footer>
 
-<!-- LOADER -->
 <div class="loader-overlay" id="loader">
   <div class="loader-box">
     <div class="spinner"></div>
@@ -216,111 +241,96 @@ button{
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
+/* ⭐ SAME SCRIPT — UNCHANGED */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc }
+from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc
-} from
-"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
-  authDomain: "jp-boys.firebaseapp.com",
-  projectId: "jp-boys",
-  storageBucket: "jp-boys.firebasestorage.app",
-  messagingSenderId: "1015271887162",
-  appId: "1:1015271887162:web:35dbd2b95f3df3f3908003"
+const firebaseConfig={
+ apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+ authDomain:"jp-boys.firebaseapp.com",
+ projectId:"jp-boys",
+ storageBucket:"jp-boys.firebasestorage.app",
+ messagingSenderId:"1015271887162",
+ appId:"1:1015271887162:web:35dbd2b95f3df3f3908003"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 /* DOM */
-const regForm = document.getElementById("regForm");
-const photo = document.getElementById("photo");
-const preview = document.getElementById("preview");
-const receipt = document.getElementById("receipt");
-const loader = document.getElementById("loader");
+const regForm=document.getElementById("regForm");
+const photo=document.getElementById("photo");
+const preview=document.getElementById("preview");
+const receipt=document.getElementById("receipt");
+const loader=document.getElementById("loader");
 
-const nameInput = document.getElementById("name");
-const mobileInput = document.getElementById("mobile");
-const roleInput = document.getElementById("role");
-const battingInput = document.getElementById("batting");
-const bowlingInput = document.getElementById("bowling");
-const dobInput = document.getElementById("dob");
-const addressInput = document.getElementById("address");
+const nameInput=document.getElementById("name");
+const mobileInput=document.getElementById("mobile");
+const roleInput=document.getElementById("role");
+const battingInput=document.getElementById("batting");
+const bowlingInput=document.getElementById("bowling");
+const dobInput=document.getElementById("dob");
+const addressInput=document.getElementById("address");
 
-/* BASE64 */
 function toBase64(file){
-  return new Promise(resolve=>{
-    const r = new FileReader();
-    r.onload = ()=>resolve(r.result);
-    r.readAsDataURL(file);
-  });
+ return new Promise(resolve=>{
+  const r=new FileReader();
+  r.onload=()=>resolve(r.result);
+  r.readAsDataURL(file);
+ });
 }
 
-/* PROFILE PHOTO PREVIEW + HIDE INPUT */
 photo.addEventListener("change",()=>{
-  const f = photo.files[0];
-  if(!f) return;
-
-  const r = new FileReader();
-  r.onload = e=>{
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    photo.style.display = "none";
-  };
-  r.readAsDataURL(f);
+ const f=photo.files[0];
+ if(!f) return;
+ const r=new FileReader();
+ r.onload=e=>{
+  preview.src=e.target.result;
+  preview.style.display="block";
+  photo.style.display="none";
+ };
+ r.readAsDataURL(f);
 });
 
-/* SUBMIT */
-regForm.addEventListener("submit", async(e)=>{
-  e.preventDefault();
+regForm.addEventListener("submit",async(e)=>{
+ e.preventDefault();
+ if(!photo.files[0]||!receipt.files[0]){
+  alert("Please upload all images");
+  return;
+ }
 
-  if(!photo.files[0] || !receipt.files[0]){
-    alert("Please upload all images");
-    return;
-  }
+ loader.style.display="flex";
 
-  loader.style.display = "flex";
+ try{
+  const photo64=await toBase64(photo.files[0]);
+  const receipt64=await toBase64(receipt.files[0]);
 
-  try{
-    const photo64 = await toBase64(photo.files[0]);
-    const receipt64 = await toBase64(receipt.files[0]);
+  await addDoc(collection(db,"players"),{
+   name:nameInput.value.trim(),
+   mobile:mobileInput.value.trim(),
+   role:roleInput.value,
+   batting:battingInput.value,
+   bowling:bowlingInput.value||"NA",
+   dob:dobInput.value,
+   address:addressInput.value.trim(),
+   photo:photo64,
+   receipt:receipt64,
+   sold:false,
+   createdAt:Date.now()
+  });
 
-    await addDoc(collection(db,"players"),{
-      name: nameInput.value.trim(),
-      mobile: mobileInput.value.trim(),
-      role: roleInput.value,
-      batting: battingInput.value,
-      bowling: bowlingInput.value || "NA",
-      dob: dobInput.value,
-      address: addressInput.value.trim(),
-      photo: photo64,
-      receipt: receipt64,
-      sold:false,
-      createdAt: Date.now()
-    });
+  loader.style.display="none";
+  alert("✅ Congratulations Registration Successfully Completed ");
+  location.reload();
 
-    loader.style.display = "none";
-    alert("✅ Congratulations Registration Successfully Completed ");
-    location.reload();
-
-  }catch(err){
-    loader.style.display = "none";
-    alert("❌ Error: " + err.message);
-  }
+ }catch(err){
+  loader.style.display="none";
+  alert("❌ Error: "+err.message);
+ }
 });
-
 </script>
 
 </body>
 </html>
-
