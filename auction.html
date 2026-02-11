@@ -73,11 +73,13 @@ footer{background:linear-gradient(90deg,#1e3c72,#2a5298);text-align:center;paddi
 🏏 JP Boy's Cricketer's © 2026 | Designed By K B UMESH
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import {
   getFirestore, collection, query, where, onSnapshot,
-  doc, updateDoc, getDoc, setDoc
+  doc, updateDoc, getDoc, setDoc, addDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
@@ -114,7 +116,7 @@ let teams=[
  {name:"Shadow Strikers",money:100000,players:[],logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770640193/Shadow_Strikers_xlky53.jpg"}
 ];
 
-/* 🔥 LOAD/SYNC TEAM DATA */
+/* LOAD TEAM MONEY ONLY */
 async function loadTeamBalances(){
  for(let i=0;i<teams.length;i++){
    const ref=doc(db,"teams",teams[i].name);
@@ -122,10 +124,20 @@ async function loadTeamBalances(){
 
    if(snap.exists()){
      teams[i].money=snap.data().money;
-     teams[i].players=snap.data().players||[];
    }else{
-     await setDoc(ref,{money:teams[i].money,players:[]});
+     await setDoc(ref,{money:teams[i].money});
    }
+
+   // Load sold players separately
+   const soldSnap=await getDocs(query(
+     collection(db,"teamPlayers"),
+     where("teamName","==",teams[i].name)
+   ));
+
+   teams[i].players=[];
+   soldSnap.forEach(d=>{
+     teams[i].players.push(d.data());
+   });
  }
  renderTeams();
 }
@@ -139,22 +151,7 @@ let current=null;
 let auctionLive=false;
 
 /* LOAD PLAYERS */
-
-/* Below code allows all playes for bidding including verified , rejected ,pending  */
-
 const q=query(collection(db,"players"),where("sold","==",false));
-
-
-
-/* Below code allows only verified players in the bidding auction  */
-
-// const q = query(
-//   collection(db,"players"),
-//   where("sold","==",false),
-//   where("status","==","verified")
-// );
-
-
 
 onSnapshot(q,(snap)=>{
  players=[];
@@ -197,20 +194,19 @@ function showPlayer(status){
   <p>${current.mobile}</p>`;
 }
 
-/* BID */
+/* FIXED BID */
 window.placeBid=async()=>{
  if(!isAdmin || !auctionLive || !current) return;
+
  const amt=Number(bidAmount.value);
  const i=teamSelect.value;
  if(amt<=0) return alert("Enter amount");
  if(teams[i].money<amt) return alert("No balance");
 
  teams[i].money-=amt;
- teams[i].players.push({...current,amount:amt});
 
  await updateDoc(doc(db,"teams",teams[i].name),{
-   money:teams[i].money,
-   players:teams[i].players
+   money:teams[i].money
  });
 
  await updateDoc(doc(db,"players",current.id),{
@@ -220,13 +216,22 @@ window.placeBid=async()=>{
    soldAt:Date.now()
  });
 
+ await addDoc(collection(db,"teamPlayers"),{
+   teamName:teams[i].name,
+   name:current.name,
+   photo:current.photo,
+   amount:amt
+ });
+
+ teams[i].players.push({...current,amount:amt});
+
  showPlayer("sold");
  bidAmount.value="";
  setTimeout(nextPlayer,800);
  renderTeams();
 };
 
-/* UNSOLD LOOP */
+/* UNSOLD */
 window.skipPlayer=()=>{
  if(!isAdmin || !auctionLive || !current) return;
  unsoldPool.push(current);
@@ -256,43 +261,6 @@ function renderTeams(){
  });
 }
 
-/* PDF */
-window.downloadTeamPDF=async(teamIndex)=>{
- const {jsPDF}=window.jspdf;
- const pdf=new jsPDF();
- const team=teams[teamIndex];
- let y=10;
-
- pdf.setFontSize(16);
- pdf.text(team.name,10,y);
- y+=10;
-
- for(const p of team.players){
-  const img=await loadImage(p.photo);
-  if(y>250){pdf.addPage();y=10;}
-  pdf.addImage(img,"JPEG",10,y,30,30);
-  pdf.text(`Name: ${p.name}`,45,y+10);
-  pdf.text(`Price: ₹${p.amount}`,45,y+20);
-  y+=40;
- }
- pdf.save(`${team.name}.pdf`);
-};
-
-function loadImage(url){
- return new Promise(resolve=>{
-  const img=new Image();
-  img.crossOrigin="anonymous";
-  img.onload=()=>{
-   const c=document.createElement("canvas");
-   c.width=img.width;
-   c.height=img.height;
-   c.getContext("2d").drawImage(img,0,0);
-   resolve(c.toDataURL("image/jpeg"));
-  };
-  img.src=url;
- });
-}
-
 const teamsDiv=document.getElementById("teams");
 const teamSelect=document.getElementById("teamSelect");
 const bidAmount=document.getElementById("bidAmount");
@@ -300,6 +268,75 @@ const playerCard=document.getElementById("playerCard");
 const toggleBtn=document.getElementById("toggleBtn");
 
 renderTeams();
+
+window.downloadTeamPDF = async function(index){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const team = teams[index];
+
+  doc.setFontSize(18);
+  doc.text(team.name, 80, 20);
+
+  doc.setFontSize(12);
+  doc.text("Remaining Balance: ₹" + team.money, 20, 35);
+
+  let y = 50;
+
+  if(team.players.length === 0){
+    doc.text("No players purchased", 20, y);
+  } else {
+
+    for(let p of team.players){
+
+      // Player Name
+      doc.text("Name: " + p.name, 20, y);
+
+      // Amount
+      doc.text("Amount: ₹" + p.amount, 20, y + 7);
+
+      // Player Photo
+      if(p.photo){
+        try{
+          const imgData = await toDataURL(p.photo);
+          doc.addImage(imgData, "JPEG", 150, y - 5, 30, 30);
+        }catch(e){
+          console.log("Image load failed");
+        }
+      }
+
+      y += 40;
+
+      if(y > 260){
+        doc.addPage();
+        y = 20;
+      }
+    }
+  }
+
+  doc.save(team.name.replace(/\s/g,"_") + "_Team.pdf");
+};
+
+
+/* Convert Image URL to Base64 */
+function toDataURL(url){
+  return fetch(url)
+    .then(res => res.blob())
+    .then(blob => new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    }));
+}
+
+
+
+
+
+
+
 </script>
 
 </body>
