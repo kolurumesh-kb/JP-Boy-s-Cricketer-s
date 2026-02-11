@@ -142,7 +142,7 @@ footer{
 <h3 style="text-align:center">Teams</h3>
 <div id="teams"></div>
 
-<footer>JP Boys Cricketers © 2026</footer>
+<footer>🏏 JP Boy's Cricketer's © 2026 | Designed By K B UMESH</footer>
 
 <audio id="soldSound">
   <source src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3">
@@ -151,6 +151,16 @@ footer{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+// import {
+//   getFirestore,
+//   collection,
+//   onSnapshot,
+//   getDocs,
+//   deleteDoc,
+//   doc
+// } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
@@ -175,7 +185,7 @@ const TEAMS = [
   {name:"Spartan Striker's",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148162/spartan_kkb1ih.jpg"},
   {name:"Ghost Rider's",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/ghost_x1pqzm.jpg"},
   {name:"Trinetra Titans",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/trinetra_auzzjv.jpg"},
-  {name:"Fire Fighter's",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770148161/firefighter_ekp3wb.jpg"}
+  {name:"Shadow Strikers",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770640193/Shadow_Strikers_xlky53.jpg"}
 ];
 
 onSnapshot(collection(db,"players"), snap => {
@@ -277,6 +287,67 @@ function loadImageAsBase64(url) {
 }
 
 
+
+
+
+// import {
+//   collection,
+//   getDocs,
+//   query,
+//   where,
+//   deleteDoc,
+//   doc
+// } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// async function deleteAllSoldPlayers() {
+//   try {
+//     const q = query(collection(db, "players"), where("status", "==", "sold"));
+//     const snapshot = await getDocs(q);
+
+//     const deletions = [];
+//     snapshot.forEach((player) => {
+//       deletions.push(deleteDoc(doc(db, "players", player.id)));
+//     });
+
+//     await Promise.all(deletions);
+
+//     alert("All sold players deleted successfully ✅");
+//   } catch (err) {
+//     console.error(err);
+//     alert("Error deleting sold players ❌");
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*   Downloading the team PDF files    */
+
+
 window.downloadPDF = async (team) => {
 
   const list = soldPlayers.filter(
@@ -318,6 +389,54 @@ window.downloadPDF = async (team) => {
 
   pdf.save(team + ".pdf");
 };
+
+
+
+
+
+
+
+
+// /* ========= CLEAR SOLD PLAYERS (SAFE ADDON) ========= */
+
+// async function clearSoldPlayers() {
+//   try {
+
+//     const snap = await getDocs(collection(db, "players"));
+
+//     const deletions = [];
+
+//     snap.forEach(d => {
+//       const data = d.data();
+
+//       // Only delete sold players (same logic your page uses)
+//       if (data.sold === true) {
+//         deletions.push(deleteDoc(doc(db, "players", d.id)));
+//       }
+//     });
+
+//     await Promise.all(deletions);
+
+//     // Reset UI immediately
+//     latestDiv.innerHTML = "Waiting for sale...";
+//     historyDiv.innerHTML = "";
+//     teamsDiv.innerHTML = "";
+
+//     shown.clear();
+//     soldPlayers = [];
+
+//     alert("All sold players cleared ✅");
+
+//   } catch (e) {
+//     console.error(e);
+//     alert("Failed clearing sold players ❌");
+//   }
+// }
+
+// // expose to button/admin call
+// window.clearSoldPlayers = clearSoldPlayers;
+
+
 
 
 
