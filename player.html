@@ -198,6 +198,7 @@ footer{
     <div class="stat-box">Batsman<b id="batCount">0</b></div>
     <div class="stat-box">Bowler<b id="bowlCount">0</b></div>
     <div class="stat-box">All-Rounder<b id="allCount">0</b></div>
+    <div class="stat-box">Wicket -Keeper Batsman<b id="wkbCount">0</b></div>
   </div>
 
   <button class="download-btn" onclick="downloadAllPlayersPDF()">
@@ -257,6 +258,7 @@ function updateCounts(){
   batCount.textContent = players.filter(p=>p.role==="Batsman").length;
   bowlCount.textContent = players.filter(p=>p.role==="Bowler").length;
   allCount.textContent = players.filter(p=>p.role==="All-Rounder").length;
+   wkbCount.textContent = players.filter(p=>p.role==="Wicket -Keeper Batsman").length;
 }
 
 function renderPlayers(){
