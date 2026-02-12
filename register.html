@@ -222,7 +222,7 @@ button{
 <label>Pay Using UPI ID : 8197901199@ybl <br>or</br> Use Below Scanner</label>
 
 <div class="qr-box">
-  <img src="assets/images/qr1.png">
+  <img src="/assets/images/qr1.png">
   <p>Upload receipt after payment</p>
 </div>
 
@@ -246,7 +246,7 @@ button{
 <script type="module">
 /* ⭐ SAME SCRIPT — UNCHANGED */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc }
+import { getFirestore, collection, addDoc , doc, onSnapshot}
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -263,6 +263,38 @@ const db=getFirestore(app);
 
 /* DOM */
 const regForm=document.getElementById("regForm");
+
+/* =============================
+   REGISTRATION BUTTON CONTROL
+============================= */
+
+const submitBtn =
+  regForm.querySelector("button[type='submit']");
+
+onSnapshot(doc(db,"settings","registration"), snap => {
+
+  if(!snap.exists()) return;
+
+  if(snap.data().open === false){
+
+    submitBtn.disabled = true;
+    submitBtn.style.background = "#777";
+    submitBtn.innerText = "Registration Closed";
+
+  }else{
+
+    submitBtn.disabled = false;
+    submitBtn.innerText = "Submit Registration";
+
+  }
+
+});
+
+
+
+
+
+
 const photo=document.getElementById("photo");
 const preview=document.getElementById("preview");
 const receipt=document.getElementById("receipt");
@@ -324,7 +356,7 @@ regForm.addEventListener("submit",async(e)=>{
   });
 
   loader.style.display="none";
-  alert("✅ Congratulations Registration Successfully Completed ");
+  alert("✅ Congratulations Your Registration Successfully Completed ");
   location.reload();
 
  }catch(err){
@@ -336,5 +368,3 @@ regForm.addEventListener("submit",async(e)=>{
 
 </body>
 </html>
-
-
