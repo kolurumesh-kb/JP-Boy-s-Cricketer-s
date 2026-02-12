@@ -81,6 +81,9 @@ input[type="email"]{background:orange}
 
 <div class="box" id="controlBox" style="display:none">
 
+  
+
+
   <!-- ⭐ ADVANCED NOTIFICATION PANEL -->
   <div class="notify">
     <b>📊 Registration Status</b>
@@ -95,6 +98,9 @@ input[type="email"]{background:orange}
 <label>Owner Editing <input type="checkbox" id="ownerToggle"></label>
 
 <button class="yellow" onclick="goVerify()">Verify Payments</button>
+
+<button class="red" id="toggleRegBtn">Disable Registration</button>
+
 <button class="green" onclick="goAuction()">Go to Auction</button>
 
 <button onclick="clearSoldPlayers()">Clear Sold Players</button>
@@ -142,6 +148,7 @@ import {
   getFirestore,
   collection,
   getDocs,
+  getDoc,  
   deleteDoc,
   doc,
   updateDoc,
@@ -156,6 +163,65 @@ const app = initializeApp({
   projectId: "jp-boys"
 });
 const db = getFirestore(app);
+
+
+
+
+
+/* =============================
+   GLOBAL REGISTRATION TOGGLE
+============================= */
+/* =============================
+   GLOBAL REGISTRATION TOGGLE
+   WITH CONFIRMATION MESSAGE
+============================= */
+
+const toggleBtn = document.getElementById("toggleRegBtn");
+
+async function refreshToggleText(){
+
+  const snap = await getDoc(doc(db,"settings","registration"));
+
+  const open = snap.exists()
+    ? snap.data().open !== false
+    : true;
+
+  toggleBtn.textContent = open
+    ? "Disable Registration"
+    : "Enable Registration";
+}
+
+
+/* CLICK HANDLER */
+
+toggleBtn.onclick = async ()=>{
+
+  const ref = doc(db,"settings","registration");
+  const snap = await getDoc(ref);
+
+  const open = snap.exists()
+    ? snap.data().open !== false
+    : true;
+
+  /* ⭐ Confirmation Dialog */
+  const confirmMsg = open
+    ? "Do you want to DISABLE registration?"
+    : "Do you want to ENABLE registration?";
+
+  if(!confirm(confirmMsg)) return;
+
+  /* ⭐ Update Firestore */
+  await setDoc(ref,{ open: !open },{ merge:true });
+
+  /* ⭐ Update Button Text */
+  refreshToggleText();
+};
+
+
+/* Initialize Button Text */
+refreshToggleText();
+
+
 
 
 /* 🔊 SOUND */
