@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,18 +14,22 @@ body{
   align-items:center;
   height:100vh;
 }
+
 .box{
   background:#102840;
   padding:20px;
   border-radius:14px;
-  width:300px;
+  width:340px;
 }
+
 h3{text-align:center}
+
 label{
   display:flex;
   justify-content:space-between;
   margin:12px 0;
 }
+
 button{
   width:100%;
   padding:10px;
@@ -35,6 +38,7 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
+
 button.green{background:green;color:#fff}
 button.yellow{background:#ffd700}
 button.red{background:#d9534f;color:#fff}
@@ -49,8 +53,21 @@ input[type="email"]{
   margin-bottom:10px;
 }
 input[type="email"]{background:orange}
-</style>
 
+/* ⭐ NEW NOTIFY PANEL */
+.notify{
+  background:#173d61;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:14px;
+  border-left:5px solid #ffd700;
+}
+
+.small{
+  font-size:13px;
+  opacity:0.9;
+}
+</style>
 </head>
 
 <body>
@@ -63,17 +80,26 @@ input[type="email"]{background:orange}
 </div>
 
 <div class="box" id="controlBox" style="display:none">
+
+  <!-- ⭐ ADVANCED NOTIFICATION PANEL -->
+  <div class="notify">
+    <b>📊 Registration Status</b>
+    <div id="notifyContent">Loading...</div>
+  </div>
+
   <h3>Auction Control</h3>
 
-<label>Auction ON <input type="checkbox" id="auctionToggle"></label> <label>Bidding Enabled <input type="checkbox" id="bidToggle"></label> <label>Enable Player Reset <input type="checkbox" id="resetToggle"></label>
-
-<!-- ⭐ NEW OWNER EDIT TOGGLE -->
-
+<label>Auction ON <input type="checkbox" id="auctionToggle"></label>
+<label>Bidding Enabled <input type="checkbox" id="bidToggle"></label>
+<label>Enable Player Reset <input type="checkbox" id="resetToggle"></label>
 <label>Owner Editing <input type="checkbox" id="ownerToggle"></label>
 
-<button class="yellow" onclick="goVerify()">Verify Payments</button> <button class="green" onclick="goAuction()">Go to Auction</button>
+<button class="yellow" onclick="goVerify()">Verify Payments</button>
+<button class="green" onclick="goAuction()">Go to Auction</button>
 
-<button onclick="clearSoldPlayers()">Clear Sold Players</button> <button class="red" onclick="resetAllPlayers()">RESET ALL PLAYERS</button> <button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
+<button onclick="clearSoldPlayers()">Clear Sold Players</button>
+<button class="red" onclick="resetAllPlayers()">RESET ALL PLAYERS</button>
+<button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
 
 </div>
 
@@ -107,9 +133,11 @@ function goAuction(){ window.location.href="auction.html"; }
 function goVerify(){ window.location.href="verify.html"; }
 </script>
 
+
 <script type="module">
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+
 import {
   getFirestore,
   collection,
@@ -117,7 +145,8 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-  setDoc
+  setDoc,
+  onSnapshot
 } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
@@ -128,14 +157,69 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-/* OWNER EDIT TOGGLE (GLOBAL) */
+
+/* 🔊 SOUND */
+function playAlert(){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.frequency.value=880;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime+0.6);
+}
+
+window.addEventListener("click",()=>{
+ const ctx=new(window.AudioContext||window.webkitAudioContext)();
+ ctx.resume();
+},{once:true});
+
+
+/* ⭐ REALTIME DASHBOARD STATUS */
+let initialized=false;
+
+onSnapshot(collection(db,"players"), snap=>{
+
+  const players=[];
+  snap.forEach(d=>players.push(d.data()));
+
+  players.sort((a,b)=>b.createdAt-a.createdAt);
+
+  const total=players.length;
+  const latest=players[0]?.name || "None";
+  const lastFive=players.slice(0,5);
+
+  notifyContent.innerHTML=`
+    Total Registered : <b>${total}</b><br>
+    Latest Player : <b>${latest}</b><br><br>
+
+    <div class="small">
+    Last 5 Registered:<br>
+    ${ lastFive.length
+      ? lastFive.map(p=>"• "+p.name).join("<br>")
+      : "No registrations yet"
+    }
+    </div>
+  `;
+
+  if(initialized){
+    playAlert();
+  }
+
+  initialized=true;
+});
+
+
+/* OWNER TOGGLE */
 ownerToggle.onchange = async e=>{
  await setDoc(doc(db,"settings","ownerControl"),{
    editingEnabled:e.target.checked
  });
 };
 
-/* DELETE ALL PLAYERS */
+
+/* EXISTING FUNCTIONS — UNCHANGED */
 window.resetAllPlayers = async () => {
  if(localStorage.getItem("isAdmin")!=="true") return;
  if(localStorage.getItem("playerResetEnabled")!=="true"){
@@ -150,7 +234,6 @@ window.resetAllPlayers = async () => {
  alert("All players deleted.");
 };
 
-/* CLEAR SOLD PLAYERS */
 window.clearSoldPlayers = async () => {
  const snap = await getDocs(collection(db,"players"));
  const jobs=[];
@@ -162,7 +245,6 @@ window.clearSoldPlayers = async () => {
  alert("Sold players cleared");
 };
 
-/* RESET AUCTION */
 window.resetAuctionSeason = async () => {
  if(!confirm("Reset balances + sold data?")) return;
 
@@ -189,7 +271,7 @@ window.resetAuctionSeason = async () => {
  await Promise.all(jobs);
  alert("Auction fully reset ✅");
 };
-</script>
 
+</script>
 </body>
 </html>
