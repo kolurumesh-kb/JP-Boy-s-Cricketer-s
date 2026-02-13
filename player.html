@@ -221,6 +221,13 @@ footer{
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 
+function optimizeImage(url){
+  if(!url) return "";
+  if(!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/","/upload/q_auto,f_auto/");
+}
+
+
 import {
   getFirestore,
   collection,
@@ -277,7 +284,8 @@ function renderPlayers(){
     previousStatus[p.mobile]=status;
 
     card.innerHTML=`
-        <img src="${p.photo}">
+        <img loading="lazy" src="${optimizeImage(p.photo)}">
+
         <div class="player-info">
           <b>${p.name}</b>
           <p>📞 ${p.mobile}</p>
@@ -330,7 +338,8 @@ function loadImage(url){
       c.getContext("2d").drawImage(img,0,0);
       resolve(c.toDataURL("image/jpeg"));
     };
-    img.src=url;
+    img.src=optimizeImage(url);
+
   });
 }
 
