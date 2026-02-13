@@ -152,6 +152,14 @@ footer{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+function optimizeImage(url){
+  if(!url) return "";
+  if(!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/","/upload/q_auto,f_auto/");
+}
+
+
+
 // import {
 //   getFirestore,
 //   collection,
@@ -201,7 +209,8 @@ onSnapshot(collection(db,"players"), snap => {
 
   /* BIG CARD */
   latestDiv.innerHTML = `
-    <img src="${latest.photo}">
+   <img loading="lazy" src="${optimizeImage(latest.photo)}">
+
     <h2>${latest.name}</h2>
     <p>${latest.role}</p>
     <p>Sold to <b>${latest.soldTeam}</b></p>
@@ -220,7 +229,8 @@ onSnapshot(collection(db,"players"), snap => {
   soldPlayers.slice(1).forEach(p=>{
     historyDiv.innerHTML+=`
       <div class="small-player">
-        <img src="${p.photo}">
+        <img loading="lazy" src="${optimizeImage(p.photo)}">
+
         <b>${p.name}</b><br>
         ₹${p.soldAmount}
       </div>
@@ -238,7 +248,8 @@ function renderTeams(){
     teamsDiv.innerHTML+=`
       <div class="team">
         <div class="team-top">
-          <img src="${t.logo}">
+          <img loading="lazy" src="${optimizeImage(t.logo)}">
+
           <b>${t.name}</b>
         </div>
         ${
@@ -282,7 +293,8 @@ function loadImageAsBase64(url) {
       resolve(canvas.toDataURL("image/jpeg"));
     };
     img.onerror = reject;
-    img.src = url;
+   img.src = optimizeImage(url);
+
   });
 }
 
