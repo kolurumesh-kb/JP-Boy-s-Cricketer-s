@@ -152,6 +152,14 @@ DELETE ALL ENTRIES </button>
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 
+
+function optimizeImage(url){
+  if(!url) return "";
+  if(!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/","/upload/q_auto,f_auto/");
+}
+
+
 import {
   getFirestore,
   collection,
@@ -198,7 +206,7 @@ async function load(){
 
     card.innerHTML=`
       <h3>${pData.name}</h3>
-      ${pData.receipt ? `<img src="${pData.receipt}">` : "<i>No receipt</i>"}
+      ${pData.receipt ? `<img loading="lazy" src="${optimizeImage(pData.receipt)}">` : "<i>No receipt</i>"}
       <div class="status ${statusClass(status)}">
         Status: ${status.toUpperCase()}
       </div>
@@ -276,7 +284,8 @@ function loadImage(url){
       c.getContext("2d").drawImage(img,0,0);
       resolve(c.toDataURL("image/jpeg"));
     };
-    img.src=url;
+   img.src=optimizeImage(url);
+
   });
 }
 
