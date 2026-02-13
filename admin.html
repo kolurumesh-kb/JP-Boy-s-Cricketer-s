@@ -311,19 +311,52 @@ window.clearSoldPlayers = async () => {
  alert("Sold players cleared");
 };
 
+// window.resetAuctionSeason = async () => {
+//  if(!confirm("Reset balances + sold data?")) return;
+
+//  const teamSnap = await getDocs(collection(db,"teams"));
+//  const jobs=[];
+
+//  teamSnap.forEach(t=>{
+//    jobs.push(updateDoc(doc(db,"teams",t.id),{
+//      money:100000,
+//      players:[]
+//    }));
+//  });
+
+//  const playerSnap = await getDocs(collection(db,"players"));
+//  playerSnap.forEach(p=>{
+//    jobs.push(updateDoc(doc(db,"players",p.id),{
+//      sold:false,
+//      soldAmount:null,
+//      soldTeam:null,
+//      soldAt:null
+//    }));
+//  });
+
+//  await Promise.all(jobs);
+//  alert("Auction fully reset ✅");
+// };
+
+
+
+
+
 window.resetAuctionSeason = async () => {
+
  if(!confirm("Reset balances + sold data?")) return;
 
- const teamSnap = await getDocs(collection(db,"teams"));
  const jobs=[];
 
+ /* 1️⃣ Reset Team Money */
+ const teamSnap = await getDocs(collection(db,"teams"));
  teamSnap.forEach(t=>{
    jobs.push(updateDoc(doc(db,"teams",t.id),{
-     money:100000,
-     players:[]
+     money:100000
    }));
  });
 
+ /* 2️⃣ Reset Player Sold Status */
  const playerSnap = await getDocs(collection(db,"players"));
  playerSnap.forEach(p=>{
    jobs.push(updateDoc(doc(db,"players",p.id),{
@@ -334,9 +367,22 @@ window.resetAuctionSeason = async () => {
    }));
  });
 
+ /* 3️⃣ 🔥 IMPORTANT — DELETE teamPlayers COLLECTION */
+ const teamPlayersSnap = await getDocs(collection(db,"teamPlayers"));
+ teamPlayersSnap.forEach(tp=>{
+   jobs.push(deleteDoc(doc(db,"teamPlayers",tp.id)));
+ });
+
  await Promise.all(jobs);
- alert("Auction fully reset ✅");
+
+ alert("Auction fully reset ✅ (Balances + Sold Data Cleared)");
+
 };
+
+
+
+
+
 
 </script>
 </body>
