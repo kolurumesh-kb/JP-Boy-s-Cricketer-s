@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Receipt Verification</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- ⭐ NEW — PDF Library -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -39,7 +36,6 @@ body{
 
 .container{ padding:20px; }
 
-/* ⭐ PDF BUTTON STYLE */
 .pdf-btn{
   background:#ffd700;
   color:#000;
@@ -111,7 +107,6 @@ button.deleteOne{ background:#ff8800; }
   font-size:14px;
 }
 </style>
-
 </head>
 
 <body>
@@ -124,8 +119,6 @@ button.deleteOne{ background:#ff8800; }
 </div>
 
 <div class="container">
-
-  <!-- ⭐ NEW PDF BUTTON -->
 
   <button class="pdf-btn" onclick="downloadPDF()">
     ⬇ Download All Details PDF
@@ -152,14 +145,6 @@ DELETE ALL ENTRIES </button>
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 
-
-function optimizeImage(url){
-  if(!url) return "";
-  if(!url.includes("res.cloudinary.com")) return url;
-  return url.replace("/upload/","/upload/q_auto,f_auto/");
-}
-
-
 import {
   getFirestore,
   collection,
@@ -170,15 +155,22 @@ import {
 } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+function optimizeImage(url){
+  if(!url) return "";
+  if(!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/","/upload/q_auto,f_auto/");
+}
+
 const app = initializeApp({
   apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
   authDomain:"jp-boys.firebaseapp.com",
   projectId:"jp-boys"
 });
-const db = getFirestore(app);
 
+const db = getFirestore(app);
 const list=document.getElementById("list");
-let cachedDocs=[];   // ⭐ store docs for PDF reuse
+
+let cachedDocs=[];
 
 function statusClass(s){
   if(s==="verified") return "verified";
@@ -187,11 +179,14 @@ function statusClass(s){
 }
 
 async function load(){
+
+  const scrollPosition = window.scrollY; // 🔥 Save scroll
+
   list.innerHTML="";
   let v=0,p=0,r=0;
 
   const snap = await getDocs(collection(db,"players"));
-  cachedDocs=[...snap.docs].reverse();  // ⭐ keep for pdf
+  cachedDocs=[...snap.docs].reverse();
 
   cachedDocs.forEach(d=>{
     const pData=d.data();
@@ -240,9 +235,11 @@ async function load(){
   vCount.textContent=v;
   pCount.textContent=p;
   rCount.textContent=r;
+
+  window.scrollTo(0, scrollPosition); // 🔥 Restore scroll
 }
 
-/* ⭐⭐⭐ PDF DOWNLOAD FUNCTION (NEW FEATURE) ⭐⭐⭐ */
+/* PDF */
 window.downloadPDF = async ()=>{
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
@@ -284,8 +281,7 @@ function loadImage(url){
       c.getContext("2d").drawImage(img,0,0);
       resolve(c.toDataURL("image/jpeg"));
     };
-   img.src=optimizeImage(url);
-
+    img.src=optimizeImage(url);
   });
 }
 
