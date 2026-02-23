@@ -448,16 +448,39 @@ let current=null;
 let auctionLive=false;
 
 /* LOAD PLAYERS */
-const q=query(collection(db,"players"),where("sold","==",false));
+// const q=query(collection(db,"players"),where("sold","==",false));
+
+// onSnapshot(q,(snap)=>{
+//  players=[];
+//  snap.forEach(d=>players.push({id:d.id,...d.data()}));
+//  if(!auctionLive){
+//    remaining=[...players];
+//    unsoldPool=[];
+//  }
+// });
+
+const q = query(collection(db,"players"), where("sold","==",false));
 
 onSnapshot(q,(snap)=>{
- players=[];
- snap.forEach(d=>players.push({id:d.id,...d.data()}));
- if(!auctionLive){
-   remaining=[...players];
-   unsoldPool=[];
- }
+  players=[];
+  snap.forEach(d=>players.push({id:d.id,...d.data()}));
+
+  // 🔥 FIX: Always keep remaining synced
+  if(auctionLive){
+     // Remove already processed players
+     const processedIds = new Set([
+        ...unsoldPool.map(p=>p.id),
+        ...(current ? [current.id] : [])
+     ]);
+
+     remaining = players.filter(p => !processedIds.has(p.id));
+  } else {
+     remaining=[...players];
+     unsoldPool=[];
+  }
 });
+
+
 
 /* CONTROLS */
 window.toggleAuction=()=>{
