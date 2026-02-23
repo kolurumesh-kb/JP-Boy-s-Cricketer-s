@@ -53,7 +53,9 @@ footer{background:linear-gradient(90deg,#1e3c72,#2a5298);text-align:center;paddi
   <h2>Season 4 – Live Auction</h2>
   <button id="toggleBtn" class="toggle off" onclick="toggleAuction()">Auction OFF</button>
 </div>
-
+<p id="playersRemaining" style="margin-top:8px;font-weight:bold;color:#ffd700;">
+Players Remaining: 0
+</p>
 <div class="player-card" id="playerCard">
   <h3>Auction Not Started</h3>
 </div>
@@ -73,7 +75,7 @@ footer{background:linear-gradient(90deg,#1e3c72,#2a5298);text-align:center;paddi
 🏏 JP Boy's Cricketer's © 2026 | Designed By K B UMESH
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
 
 <!-- <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -476,9 +478,20 @@ onSnapshot(q,(snap)=>{
      remaining = players.filter(p => !processedIds.has(p.id));
   } else {
      remaining=[...players];
+
+     /* Player's Count */
+     updateRemainingCount();
      unsoldPool=[];
   }
 });
+
+/* Player's Count */
+
+function updateRemainingCount(){
+  const count = remaining.length + (current ? 1 : 0);
+  document.getElementById("playersRemaining").innerText =
+    "Players Remaining: " + count;
+}
 
 
 
@@ -498,10 +511,16 @@ window.nextPlayer=()=>{
  }
  if(!auctionLive || remaining.length===0){
    playerCard.innerHTML="<h3>Auction Completed</h3>";
+   updateRemainingCount();
    return;
  }
  const i=Math.floor(Math.random()*remaining.length);
  current=remaining.splice(i,1)[0];
+
+ announcePlayer(current.name);
+
+updateRemainingCount();
+
  showPlayer("available");
 };
 
@@ -546,6 +565,9 @@ window.placeBid=async()=>{
  });
 
  showPlayer("sold");
+
+//  announceSold(teams[i].name, amt);
+
  bidAmount.value="";
  setTimeout(nextPlayer,800);
 };
@@ -585,6 +607,117 @@ const teamSelect=document.getElementById("teamSelect");
 const bidAmount=document.getElementById("bidAmount");
 const playerCard=document.getElementById("playerCard");
 const toggleBtn=document.getElementById("toggleBtn");
+
+
+
+
+
+/* 🎤 VOICE ANNOUNCER */
+function announcePlayer(name){
+
+  if(!('speechSynthesis' in window)) return;
+
+  const speech = new SpeechSynthesisUtterance(
+    "Next player. " + name
+  );
+
+  speech.lang = "en-IN";
+  speech.rate = 0.9;
+  speech.pitch = 1;
+
+  window.speechSynthesis.cancel(); // stop previous voice
+  window.speechSynthesis.speak(speech);
+}
+
+
+// /* 🔊 AUCTION VOICE SYSTEM */
+
+// function speak(text){
+
+//   if(!('speechSynthesis' in window)) return;
+
+//   const speech = new SpeechSynthesisUtterance(text);
+//   speech.lang = "en-IN";
+//   speech.rate = 0.9;
+//   speech.pitch = 1;
+
+//   window.speechSynthesis.cancel();
+//   window.speechSynthesis.speak(speech);
+// }
+
+// function announceSold(teamName, amount){
+//   const formattedAmount = amount.toLocaleString("en-IN");
+//   speak("Sold to " + teamName + " for " + formattedAmount + " rupees");
+// }
+
+/* =========================
+   TEAM PDF DOWNLOAD FIX
+========================= */
+
+window.downloadTeamPDF = async function(index){
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  const team = teams[index];
+
+  pdf.setFontSize(18);
+  pdf.text(team.name, 70, 20);
+
+  pdf.setFontSize(12);
+  pdf.text("Remaining Balance: ₹" + team.money, 20, 35);
+
+  let y = 50;
+
+  if(team.players.length === 0){
+    pdf.text("No players purchased", 20, y);
+  } else {
+
+    for(let p of team.players){
+
+      pdf.text("Name: " + p.name, 20, y);
+      pdf.text("Amount: ₹" + p.amount, 20, y + 7);
+
+      if(p.photo){
+        try{
+          const imgData = await convertToBase64(p.photo);
+          pdf.addImage(imgData, "JPEG", 150, y - 5, 30, 30);
+        }catch(e){
+          console.log("Image load failed");
+        }
+      }
+
+      y += 40;
+
+      if(y > 260){
+        pdf.addPage();
+        y = 20;
+      }
+    }
+  }
+
+  pdf.save(team.name.replace(/\s/g,"_") + "_Team.pdf");
+};
+
+
+/* IMAGE CONVERTER */
+function convertToBase64(url){
+  return fetch(url)
+    .then(res => res.blob())
+    .then(blob => new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    }));
+}
+
+
+
+
+
+
+
 
 renderTeams();
 </script>
