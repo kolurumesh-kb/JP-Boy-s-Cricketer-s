@@ -152,11 +152,40 @@ footer{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+
+/*Reducing the image size */
+
 function optimizeImage(url){
   if(!url) return "";
   if(!url.includes("res.cloudinary.com")) return url;
   return url.replace("/upload/","/upload/q_auto,f_auto/");
 }
+
+
+/* 🔊 LIVE SOLD VOICE ANNOUNCEMENT */
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-IN";
+  speech.rate = 0.9;
+  speech.pitch = 1;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(speech);
+}
+
+function announceLiveSale(player){
+  const amount = Number(player.soldAmount || 0).toLocaleString("en-IN");
+  const message =
+    player.name + " sold to " +
+    player.soldTeam + " for " +
+    amount + " rupees";
+
+  speak(message);
+}
+
 
 
 
@@ -222,11 +251,15 @@ onSnapshot(collection(db,"players"), snap => {
     sound.currentTime=0;
     sound.play().catch(()=>{});
     confetti({particleCount:200,spread:100,origin:{y:.6}});
+
+// 🔊 NEW VOICE ANNOUNCEMENT
+  announceLiveSale(latest);
+
   }
 
   /* SMALL HISTORY */
   historyDiv.innerHTML="";
-  soldPlayers.slice(1).forEach(p=>{
+  soldPlayers.slice(1,11).forEach(p=>{
     historyDiv.innerHTML+=`
       <div class="small-player">
         <img loading="lazy" src="${optimizeImage(p.photo)}">
@@ -236,6 +269,10 @@ onSnapshot(collection(db,"players"), snap => {
       </div>
     `;
   });
+
+
+
+
 
   renderTeams();
 });
