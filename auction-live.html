@@ -259,7 +259,7 @@ onSnapshot(collection(db,"players"), snap => {
 
   /* SMALL HISTORY */
   historyDiv.innerHTML="";
-  soldPlayers.slice(1,11).forEach(p=>{
+  soldPlayers.slice(1,6).forEach(p=>{
     historyDiv.innerHTML+=`
       <div class="small-player">
         <img loading="lazy" src="${optimizeImage(p.photo)}">
@@ -503,3 +503,4 @@ window.downloadPDF = async (team) => {
 
 </body>
 </html>
+
