@@ -7,13 +7,26 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
 <style>
+html, body{
+  height:100%;
+}
+
 body{
   margin:0;
   background:#081a2b;
   color:#fff;
   font-family:Segoe UI,sans-serif;
+
+  /* ✅ FIX FOR FOOTER */
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* CONTENT WRAPPER FIX */
+#teams{
+  flex:1;
 }
 
 /* HEADER */
@@ -117,11 +130,12 @@ button{
   margin-top:6px;
 }
 
+/* ✅ FOOTER FIX */
 footer{
   background:#123c6b;
   text-align:center;
-  padding:10px;
-  margin-top:20px;
+  padding:12px;
+  margin-top:auto; /* pushes footer to bottom */
 }
 </style>
 </head>
@@ -259,7 +273,7 @@ onSnapshot(collection(db,"players"), snap => {
 
   /* SMALL HISTORY */
   historyDiv.innerHTML="";
-  soldPlayers.slice(1,6).forEach(p=>{
+  soldPlayers.slice(1,11).forEach(p=>{
     historyDiv.innerHTML+=`
       <div class="small-player">
         <img loading="lazy" src="${optimizeImage(p.photo)}">
@@ -503,4 +517,3 @@ window.downloadPDF = async (team) => {
 
 </body>
 </html>
-
