@@ -182,6 +182,85 @@ button{
   100%{transform:scale(1)}
 }
 
+
+
+/* ===== SUCCESS SCREEN ===== */
+
+.success-overlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center,#0b1c2d,#000);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+  animation:fadeIn 0.6s ease forwards;
+}
+
+.success-box{
+  text-align:center;
+  animation:slideUp 0.8s ease forwards;
+}
+
+.success-logo{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:4px solid #ffd700;
+  box-shadow:0 0 25px #ffd700;
+  animation:logoPop 0.8s ease forwards;
+}
+
+.success-box h2{
+  margin-top:20px;
+  font-size:22px;
+  color:#ffd700;
+}
+
+.success-box p{
+  margin-top:8px;
+  color:#9ad1ff;
+}
+
+.success-check{
+  font-size:50px;
+  color:#00ff88;
+  margin-top:20px;
+  animation:pop 0.6s ease;
+}
+
+/* Animations */
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes slideUp{
+  from{transform:translateY(40px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+@keyframes logoPop{
+  0%{transform:scale(0)}
+  70%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </style>
 </head>
 
@@ -258,7 +337,7 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <label>Pay Using UPI ID : 8197901199@ybl <br>or</br> Use Below Scanner</label>
 
 <div class="qr-box">
-  <img src="assets/images/qr1.png">
+  <img src="/assets/images/qr1.png">
   <p>Upload receipt after payment</p>
 </div>
 
@@ -472,9 +551,23 @@ regForm.addEventListener("submit",async(e)=>{
   // alert("✅ Congratulations Your Registration Successfully Completed ");
   // location.reload();
 
+
+  /*latest added for the success animation   */
 loader.style.display="none";
 
-document.getElementById("successScreen").style.display="flex";
+// document.getElementById("successScreen").style.display="flex";
+
+
+const userName = nameInput.value.trim();
+
+document.getElementById("successTitle").innerText =
+  userName + ", Your Registration Successfully Completed 🎉";
+
+document.getElementById("successSubText").innerText =
+  "Welcome to JP Boy's Cricketer's Season-4";
+
+document.getElementById("successScreen").style.display = "flex";
+
 
 setTimeout(()=>{
   window.location.href="index.html";
@@ -499,7 +592,7 @@ setTimeout(()=>{
 
 
 
-<div id="successScreen" style="
+<!-- <div id="successScreen" style="
   display:none;
   position:fixed;
   inset:0;
@@ -513,12 +606,46 @@ setTimeout(()=>{
 ">
 
   <div style="font-size:60px;animation:pop 0.6s ease;">✅</div>
-  <h2 style="margin-top:20px;">Congratulations Your Registration Successfully Completed</h2>
+  <h2 style="margin-top:20px;">Congratulations YourRegistration Successfully Completed</h2>
   <p>Welcome to JP Boy's Cricketer's Season-4 🎉</p>
-</div>
+</div> -->
 
+
+<!-- <div id="successScreen" class="success-overlay">
+
+  <div class="success-box">
+
+    <img src="/assets/Logo.png" class="success-logo">
+
+    <h2>Congratulations Your Registration Successfully Completed 🎉</h2>
+
+    <p>Welcome to JP Boy's Cricketer's Season-4</p>
+
+    <div class="success-check">✔</div>
+
+  </div>
+
+</div> -->
+
+
+<div id="successScreen" class="success-overlay">
+
+  <div class="success-box">
+
+    <img src="/assets/Logo.png" class="success-logo">
+
+    <h2 id="successTitle">Registration Successful 🎉</h2>
+
+    <p id="successSubText">
+      Welcome to JP Boy's Cricketer's Season-4
+    </p>
+
+    <div class="success-check">✔</div>
+
+  </div>
+
+</div>
 
 
 </body>
 </html>
-
