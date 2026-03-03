@@ -148,6 +148,40 @@ button{
 @keyframes spin{
   to{transform:rotate(360deg)}
 }
+
+
+
+
+.error-text{
+  color:#ff4d4d;
+  font-size:13px;
+  margin-top:5px;
+}
+
+.size-text{
+  font-size:13px;
+  margin-top:4px;
+}
+
+.size-valid{
+  color:#00ff88;
+}
+
+.size-warning{
+  color:#ff4d4d;
+}
+
+
+
+
+
+
+@keyframes pop {
+  0%{transform:scale(0)}
+  80%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
 </style>
 </head>
 
@@ -177,6 +211,8 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <div class="photo-box">
   <img id="preview" class="preview">
   <input id="photo" type="file" accept="image/*" required>
+  <div id="photoSize" class="size-text"></div>
+  <div id="photoError" class="error-text"></div>
 </div>
 
 <label>Full Name</label>
@@ -222,12 +258,14 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <label>Pay Using UPI ID : 8197901199@ybl <br>or</br> Use Below Scanner</label>
 
 <div class="qr-box">
-  <img src="assets/images/qr1.png">
+  <img src="/assets/images/qr1.png">
   <p>Upload receipt after payment</p>
 </div>
 
 <label>Receipt</label>
 <input id="receipt" type="file" accept="image/*" required>
+<div id="receiptSize" class="size-text"></div>
+<div id="receiptError" class="error-text"></div>
 
 <button type="submit">Submit Registration</button>
 
@@ -242,6 +280,9 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
     <p style="margin-top:14px">Uploading… Please wait</p>
   </div>
 </div>
+
+
+
 
 <script type="module">
 /* ⭐ SAME SCRIPT — UNCHANGED */
@@ -293,12 +334,15 @@ onSnapshot(doc(db,"settings","registration"), snap => {
 
 
 
-
-
 const photo=document.getElementById("photo");
 const preview=document.getElementById("preview");
 const receipt=document.getElementById("receipt");
 const loader=document.getElementById("loader");
+
+const photoError=document.getElementById("photoError");
+const receiptError=document.getElementById("receiptError");
+const photoSize=document.getElementById("photoSize");
+const receiptSize=document.getElementById("receiptSize");
 
 const nameInput=document.getElementById("name");
 const mobileInput=document.getElementById("mobile");
@@ -308,6 +352,18 @@ const bowlingInput=document.getElementById("bowling");
 const dobInput=document.getElementById("dob");
 const addressInput=document.getElementById("address");
 
+/* ===== Helper Functions ===== */
+
+function formatFileSize(bytes){
+  const kb = bytes / 1024;
+  return kb.toFixed(0) + " KB";
+}
+
+function validateFileSize(file){
+  const maxSize = 1 * 1024 * 1024; // 1MB
+  return file.size <= maxSize;
+}
+
 function toBase64(file){
  return new Promise(resolve=>{
   const r=new FileReader();
@@ -316,22 +372,79 @@ function toBase64(file){
  });
 }
 
+/* ===== Profile Photo Live Validation ===== */
+
 photo.addEventListener("change",()=>{
- const f=photo.files[0];
- if(!f) return;
- const r=new FileReader();
- r.onload=e=>{
-  preview.src=e.target.result;
-  preview.style.display="block";
-  photo.style.display="none";
- };
- r.readAsDataURL(f);
+  const file = photo.files[0];
+
+  photoError.textContent="";
+  photoSize.textContent="";
+
+  if(!file) return;
+
+  const sizeText = "Uploaded: " + formatFileSize(file.size);
+
+  if(!validateFileSize(file)){
+    photoSize.textContent = sizeText;
+    photoSize.className="size-text size-warning";
+    photoError.textContent="Profile Photo must be below 500KB (200KB to 400KB recommended).";
+    photo.value="";
+    preview.style.display="none";
+    return;
+  }
+
+  photoSize.textContent = sizeText;
+  photoSize.className="size-text size-valid";
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    preview.src=e.target.result;
+    preview.style.display="block";
+  };
+  reader.readAsDataURL(file);
 });
+
+/* ===== Receipt Live Validation ===== */
+
+receipt.addEventListener("change",()=>{
+  const file = receipt.files[0];
+
+  receiptError.textContent="";
+  receiptSize.textContent="";
+
+  if(!file) return;
+
+  const sizeText = "Uploaded: " + formatFileSize(file.size);
+
+  if(!validateFileSize(file)){
+    receiptSize.textContent=sizeText;
+    receiptSize.className="size-text size-warning";
+    receiptError.textContent="Receipt must be below 500KB (200KB to 400KB recommended).";
+    receipt.value="";
+    return;
+  }
+
+  receiptSize.textContent=sizeText;
+  receiptSize.className="size-text size-valid";
+});
+
+/* ===== Form Submit ===== */
 
 regForm.addEventListener("submit",async(e)=>{
  e.preventDefault();
- if(!photo.files[0]||!receipt.files[0]){
+
+ if(!photo.files[0] || !receipt.files[0]){
   alert("Please upload all images");
+  return;
+ }
+
+ if(!validateFileSize(photo.files[0])){
+  photoError.textContent="Profile Photo must be below 200KB to 400KB.";
+  return;
+ }
+
+ if(!validateFileSize(receipt.files[0])){
+  receiptError.textContent="Receipt must be below 200KB to 400KB.";
   return;
  }
 
@@ -356,8 +469,23 @@ regForm.addEventListener("submit",async(e)=>{
   });
 
   loader.style.display="none";
-  alert("✅ Congratulations Registration Successfully Completed ");
-  location.reload();
+  // alert("✅ Congratulations Your Registration Successfully Completed ");
+  // location.reload();
+
+loader.style.display="none";
+
+document.getElementById("successScreen").style.display="flex";
+
+setTimeout(()=>{
+  window.location.href="index.html";
+},8000);
+  
+
+
+
+
+
+
 
  }catch(err){
   loader.style.display="none";
@@ -366,7 +494,30 @@ regForm.addEventListener("submit",async(e)=>{
 });
 </script>
 
+
+
+
+
+
+<div id="successScreen" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0b1c2d;
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:2000;
+  text-align:center;
+">
+
+  <div style="font-size:60px;animation:pop 0.6s ease;">✅</div>
+  <h2 style="margin-top:20px;">Congratulations Your Registration Successfully Completed</h2>
+  <p>Welcome to JP Boy's Cricketer's Season-4 🎉</p>
+</div>
+
+
+
 </body>
 </html>
-
-
