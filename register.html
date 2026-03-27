@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Registration</title>
+
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,sans-serif}
+
+body{
+  margin:0;
+  background:#0b1c2d;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER + FOOTER */
+header,footer{
+  background:linear-gradient(90deg,#1e3c72,#2a5298);
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+header a{
+  background:#ffd700;
+  color:#000;
+  padding:6px 14px;
+  border-radius:20px;
+  text-decoration:none;
+  font-size:14px;
+}
+
+footer{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  justify-content:center;
+}
+
+main{flex:1;padding:16px;padding-bottom:90px}
+
+/* 🔔 ANNOUNCEMENT SECTION */
+.announce{
+  background:linear-gradient(135deg,#102840,#173d61);
+  border-left:6px solid #ffd700;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:16px;
+  box-shadow:0 0 12px rgba(0,0,0,0.35);
+}
+
+.announce h3{
+  margin:0 0 6px 0;
+  /* color:#ffd700; */
+   color:red;
+}
+
+.announce h5{
+  margin:0;
+  font-size:14px;
+  /* color:red; */
+  color:#ffd700;
+}
+
+/* FORM */
+form{
+  max-width:420px;
+  margin:auto;
+  background:#102840;
+  padding:16px;
+  border-radius:14px;
+}
+
+label{display:block;margin-top:12px}
+
+input,select,textarea,button{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  margin-top:16px;
+  background:#ffd700;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* PROFILE PHOTO */
+.photo-box{text-align:center;margin-bottom:10px}
+
+.preview{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#fff;
+  display:none;
+  margin:auto;
+}
+
+.upload-text{
+  margin-top:6px;
+  font-size:13px;
+  color:#9ad1ff;
+}
+
+/* QR */
+.qr-box{text-align:center;margin:14px 0}
+.qr-box img{width:180px;background:#fff;padding:6px}
+
+/* LOADER */
+.loader-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.loader-box{
+  background:#102840;
+  padding:30px 40px;
+  border-radius:14px;
+  text-align:center;
+}
+
+.spinner{
+  width:50px;
+  height:50px;
+  border:5px solid #ccc;
+  border-top:5px solid #ffd700;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:auto;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+
+
+
+.error-text{
+  color:#ff4d4d;
+  font-size:13px;
+  margin-top:5px;
+}
+
+.size-text{
+  font-size:13px;
+  margin-top:4px;
+}
+
+.size-valid{
+  color:#00ff88;
+}
+
+.size-warning{
+  color:#ff4d4d;
+}
+
+
+
+
+
+
+@keyframes pop {
+  0%{transform:scale(0)}
+  80%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+
+
+/* ===== SUCCESS SCREEN ===== */
+
+.success-overlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center,#0b1c2d,#000);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+  animation:fadeIn 0.6s ease forwards;
+}
+
+.success-box{
+  text-align:center;
+  animation:slideUp 0.8s ease forwards;
+}
+
+.success-logo{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:4px solid #ffd700;
+  box-shadow:0 0 25px #ffd700;
+  animation:logoPop 0.8s ease forwards;
+}
+
+.success-box h2{
+  margin-top:20px;
+  font-size:22px;
+  color:#ffd700;
+}
+
+.success-box p{
+  margin-top:8px;
+  color:#9ad1ff;
+}
+
+.success-check{
+  font-size:50px;
+  color:#00ff88;
+  margin-top:20px;
+  animation:pop 0.6s ease;
+}
+
+/* Animations */
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes slideUp{
+  from{transform:translateY(40px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+@keyframes logoPop{
+  0%{transform:scale(0)}
+  70%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>🏏 Player Registration </div>
+  <a href="index.html">Dashboard</a>
+</header>
+
+<main>
+
+<!-- 🔔 ANNOUNCEMENT -->
+<div class="announce">
+  <h3>📢 Important Notice: </h3>
+  <h5>
+  
+Player's Must Complete The Registration Process & Upload the Profile Photo & Payment Receipt. Kindly ensure that both the Profile Photo and Payment Receipt are under 1MB Only. After successful registration, please verify your status on the Player's Page.
+  </h5>
+</div>
+
+<form id="regForm">
+
+<!-- <h5 style="color: red;">Note : Please Upload the Photo's Size 1MB only for Profile Photo and Receipt </h5> -->
+
+<div class="upload-text">Upload Profile Photo</div>
+<div class="photo-box">
+  <img id="preview" class="preview">
+  <input id="photo" type="file" accept="image/*" required>
+  <div id="photoSize" class="size-text"></div>
+  <div id="photoError" class="error-text"></div>
+</div>
+
+<label>Full Name</label>
+<input id="name" placeholder="Enter Name" required>
+
+<label>Mobile</label>
+<input id="mobile" type="tel" placeholder="Enter Mobile Number " required>
+
+<label>Role</label>
+<select id="role" required>
+  <option value="">Select</option>
+  <option>Batsman</option>
+  <option>Bowler</option>
+  <option>All-Rounder</option>
+  <option>Wicket -Keeper Batsman</option>
+</select>
+
+<label>Batting</label>
+<select id="batting" required>
+  <option value="">Select</option>
+  <option>Right Hand</option>
+  <option>Left Hand</option>
+</select>
+
+<label>Bowling</label>
+<select id="bowling" required>
+  <option value="">Select</option>
+  <option>Right Arm</option>
+  <option>Left Arm</option>
+  <option>Not a Bowler</option>
+</select>
+
+<label>DOB</label>
+<input id="dob" type="date" required>
+
+<label>Address</label>
+<textarea id="address" placeholder="Enter the address" required></textarea>
+
+<h3>💳 Payment Section :</h3>
+
+<label>Pay the Registration Fee Rs.800 Only</label>
+<br>
+<label>Pay Using UPI ID : 8197901199@ybl <br>or</br> Use Below Scanner</label>
+
+<div class="qr-box">
+  <img src="assets/images/qr1.png">
+  <p>Upload receipt after payment</p>
+</div>
+
+<label>Receipt</label>
+<input id="receipt" type="file" accept="image/*" required>
+<div id="receiptSize" class="size-text"></div>
+<div id="receiptError" class="error-text"></div>
+
+<button type="submit">Submit Registration</button>
+
+</form>
+</main>
+
+<footer>🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd. </footer>
+
+<div class="loader-overlay" id="loader">
+  <div class="loader-box">
+    <div class="spinner"></div>
+    <p style="margin-top:14px">Uploading… Please wait</p>
+  </div>
+</div>
+
+
+
+
+<script type="module">
+/* ⭐ SAME SCRIPT — UNCHANGED */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc ,getDocs, doc, onSnapshot}
+from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+ authDomain:"jp-boys.firebaseapp.com",
+ projectId:"jp-boys",
+ storageBucket:"jp-boys.firebasestorage.app",
+ messagingSenderId:"1015271887162",
+ appId:"1:1015271887162:web:35dbd2b95f3df3f3908003"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+/* DOM */
+const regForm=document.getElementById("regForm");
+
+/* =============================
+   REGISTRATION BUTTON CONTROL
+============================= */
+
+const submitBtn =
+  regForm.querySelector("button[type='submit']");
+
+onSnapshot(doc(db,"settings","registration"), snap => {
+
+  if(!snap.exists()) return;
+
+  if(snap.data().open === false){
+
+    submitBtn.disabled = true;
+    submitBtn.style.background = "#777";
+    submitBtn.innerText = "Registration Closed";
+
+  }else{
+
+    submitBtn.disabled = false;
+    submitBtn.innerText = "Submit Registration";
+
+  }
+
+});
+
+
+
+
+const photo=document.getElementById("photo");
+const preview=document.getElementById("preview");
+const receipt=document.getElementById("receipt");
+const loader=document.getElementById("loader");
+
+const photoError=document.getElementById("photoError");
+const receiptError=document.getElementById("receiptError");
+const photoSize=document.getElementById("photoSize");
+const receiptSize=document.getElementById("receiptSize");
+
+const nameInput=document.getElementById("name");
+const mobileInput=document.getElementById("mobile");
+const roleInput=document.getElementById("role");
+const battingInput=document.getElementById("batting");
+const bowlingInput=document.getElementById("bowling");
+const dobInput=document.getElementById("dob");
+const addressInput=document.getElementById("address");
+
+/* ===== Helper Functions ===== */
+
+function formatFileSize(bytes){
+  const kb = bytes / 1024;
+  return kb.toFixed(0) + " KB";
+}
+
+function validateFileSize(file){
+  const maxSize = 1 * 1024 * 1024; // 1MB
+  return file.size <= maxSize;
+}
+
+function toBase64(file){
+ return new Promise(resolve=>{
+  const r=new FileReader();
+  r.onload=()=>resolve(r.result);
+  r.readAsDataURL(file);
+ });
+}
+
+/* ===== Profile Photo Live Validation ===== */
+
+photo.addEventListener("change",()=>{
+  const file = photo.files[0];
+
+  photoError.textContent="";
+  photoSize.textContent="";
+
+  if(!file) return;
+
+  const sizeText = "Uploaded: " + formatFileSize(file.size);
+
+  if(!validateFileSize(file)){
+    photoSize.textContent = sizeText;
+    photoSize.className="size-text size-warning";
+    photoError.textContent="Profile Photo must be below 500KB (200KB to 400KB recommended).";
+    photo.value="";
+    preview.style.display="none";
+    return;
+  }
+
+  photoSize.textContent = sizeText;
+  photoSize.className="size-text size-valid";
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    preview.src=e.target.result;
+    preview.style.display="block";
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ===== Receipt Live Validation ===== */
+
+receipt.addEventListener("change",()=>{
+  const file = receipt.files[0];
+
+  receiptError.textContent="";
+  receiptSize.textContent="";
+
+  if(!file) return;
+
+  const sizeText = "Uploaded: " + formatFileSize(file.size);
+
+  if(!validateFileSize(file)){
+    receiptSize.textContent=sizeText;
+    receiptSize.className="size-text size-warning";
+    receiptError.textContent="Receipt must be below 500KB (200KB to 400KB recommended).";
+    receipt.value="";
+    return;
+  }
+
+  receiptSize.textContent=sizeText;
+  receiptSize.className="size-text size-valid";
+});
+
+/* ===== Form Submit ===== */
+
+regForm.addEventListener("submit",async(e)=>{
+ e.preventDefault();
+
+ if(!photo.files[0] || !receipt.files[0]){
+  alert("Please upload all images");
+  return;
+ }
+
+ if(!validateFileSize(photo.files[0])){
+  photoError.textContent="Profile Photo must be below 200KB to 400KB.";
+  return;
+ }
+
+ if(!validateFileSize(receipt.files[0])){
+  receiptError.textContent="Receipt must be below 200KB to 400KB.";
+  return;
+ }
+
+ loader.style.display="flex";
+
+ try{
+  const photo64=await toBase64(photo.files[0]);
+  const receipt64=await toBase64(receipt.files[0]);
+
+  // Generate Player ID
+const snapshot = await getDocs(collection(db,"players"));
+const count = snapshot.size + 1;
+
+const playerId = "JP-Boy's" + String(count).padStart(3,'0');
+
+
+
+ await addDoc(collection(db,"players"),{
+
+   playerId: playerId,
+
+   name:nameInput.value.trim(),
+   mobile:mobileInput.value.trim(),
+   role:roleInput.value,
+   batting:battingInput.value,
+   bowling:bowlingInput.value||"NA",
+   dob:dobInput.value,
+   address:addressInput.value.trim(),
+   photo:photo64,
+   receipt:receipt64,
+   sold:false,
+   createdAt:Date.now()
+
+});
+
+  loader.style.display="none";
+  // alert("✅ Congratulations Your Registration Successfully Completed ");
+  // location.reload();
+
+
+  /*latest added for the success animation   */
+loader.style.display="none";
+
+// document.getElementById("successScreen").style.display="flex";
+
+
+const userName = nameInput.value.trim();
+
+// document.getElementById("successTitle").innerText =
+//   userName + ", Your Registration Successfully Completed 🎉";
+
+// document.getElementById("successSubText").innerText =
+//   "Welcome to JP Boy's Cricketer's Season-4";
+
+document.getElementById("successTitle").innerText =
+  userName + ", Your Registration Successfully Completed 🎉";
+
+document.getElementById("successSubText").innerText =
+  "Your Player ID : " + playerId + " | Welcome to JP Boy's Cricketer's Season-4";
+
+document.getElementById("successScreen").style.display = "flex";
+
+
+setTimeout(()=>{
+  window.location.href="index.html";
+},8000);
+  
+
+
+
+
+
+
+
+ }catch(err){
+  loader.style.display="none";
+  alert("❌ Error: "+err.message);
+ }
+});
+</script>
+
+
+
+
+
+
+<!-- <div id="successScreen" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0b1c2d;
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:2000;
+  text-align:center;
+">
+
+  <div style="font-size:60px;animation:pop 0.6s ease;">✅</div>
+  <h2 style="margin-top:20px;">Congratulations YourRegistration Successfully Completed</h2>
+  <p>Welcome to JP Boy's Cricketer's Season-4 🎉</p>
+</div> -->
+
+
+<!-- <div id="successScreen" class="success-overlay">
+
+  <div class="success-box">
+
+    <img src="assets/images/Logo.png" class="success-logo">
+
+    <h2>Congratulations Your Registration Successfully Completed 🎉</h2>
+
+    <p>Welcome to JP Boy's Cricketer's Season-4</p>
+
+    <div class="success-check">✔</div>
+
+  </div>
+
+</div> -->
+
+
+<div id="successScreen" class="success-overlay">
+
+  <div class="success-box">
+
+    <img src="assets/images/Logo.png" class="success-logo">
+
+    <h2 id="successTitle">Registration Successful 🎉</h2>
+
+    <p id="successSubText">
+      Welcome to JP Boy's Cricketer's Season-4
+    </p>
+
+    <div class="success-check">✔</div>
+
+  </div>
+
+</div>
+
+
+</body>
+</html>
+
+
+

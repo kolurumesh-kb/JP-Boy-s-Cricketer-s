@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Owners</title>
+
+<style>
+body{margin:0;font-family:Segoe UI;background:#eef2f7;}
+
+header{
+background:linear-gradient(90deg,#1976d2,#512da8);
+color:#fff;padding:14px;
+display:flex;justify-content:space-between;
+align-items:center;font-weight:bold;
+}
+
+header button{
+background:#ffcc00;border:none;
+padding:7px 14px;border-radius:20px;
+font-weight:600;cursor:pointer;
+}
+
+.container{
+max-width:1100px;margin:20px auto;padding:10px;
+display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:16px;
+}
+
+.card{
+background:#fff;
+padding:18px;
+border-radius:14px;
+box-shadow:0 6px 16px rgba(0,0,0,.15);
+text-align:center;
+}
+
+.card img{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #ddd;
+margin-bottom:10px;
+}
+
+.name{font-weight:bold;font-size:18px;margin-top:6px;}
+.team{color:#666;margin-top:4px;}
+
+footer{
+height:60px;
+background:linear-gradient(90deg,#1976d2,#512da8);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:13px;
+margin-top:30px;
+}
+
+input{
+width:100%;
+padding:6px;
+margin-top:6px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button.save{
+margin-top:8px;
+width:100%;
+background:green;
+color:white;
+border:none;
+padding:8px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* PUBLIC ANNOUNCEMENT */
+.announcement{
+background:#ffeb3b;
+color:#000;
+font-weight:600;
+padding:8px 0;
+overflow:hidden;
+white-space:nowrap;
+}
+
+.announcement span{
+display:inline-block;
+padding-left:100%;
+animation:scrollText 12s linear infinite;
+}
+
+/* OWNER ANNOUNCEMENT */
+.ownerBar{
+background:#4caf50;
+color:#fff;
+display:none;
+}
+
+.ownerBar span{
+animation:scrollText 28s linear infinite;
+}
+
+
+@keyframes scrollText{
+0%{transform:translateX(0);}
+100%{transform:translateX(-100%);}
+}
+
+/* OWNER CODE POPUP */
+.popup{
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,.6);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999;
+}
+
+.popupBox{
+background:#fff;
+padding:20px;
+border-radius:12px;
+text-align:center;
+width:260px;
+}
+
+.popupBox input{
+margin-top:10px;
+}
+
+.popupBox button{
+margin-top:10px;
+background:#1976d2;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<button onclick="location.href='index.html'">Dashboard</button>
+<div>Team Owners</div>
+
+
+<!-- <div></div> -->
+
+<div>
+<button onclick="openOwnerLogin()">Owner Login</button>
+</div>
+
+
+
+
+</header>
+
+<!-- PUBLIC ANNOUNCEMENT -->
+<div class="announcement">
+<span>
+🏏 Welcome to JP Boy's Cricket Tournament • Owner list updated live • Stay tuned for bidding..!
+</span>
+</div>
+
+<!-- OWNER ANNOUNCEMENT -->
+<div class="announcement ownerBar" id="ownerBar">
+<span>
+🔒 Owner Notice: Bidding Annoucement will be informed soon and this time bidding will be done in the closed rooms with minimum members only • Keep budget ready. Don't Share this Information to Anyone.
+</span>
+</div>
+
+<!-- OWNER CODE POPUP -->
+<div class="popup" id="codePopup" style="display:none;">
+<div class="popupBox">
+<div><b>Enter Owner Code</b></div>
+<input id="codeInput" placeholder="Owner Code">
+<button onclick="verifyCode()">Submit</button>
+</div>
+</div>
+
+<div class="container" id="cards"></div>
+
+<footer>
+🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.
+</footer>
+
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+doc,
+setDoc,
+onSnapshot,
+getDoc,
+getDocs
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+authDomain:"jp-boys.firebaseapp.com",
+projectId:"jp-boys"
+});
+
+const db=getFirestore(app);
+const ownersRef=collection(db,"owners");
+
+const isAdmin=localStorage.getItem("isAdmin")==="true";
+
+let editingEnabled=false;
+try{
+const s=await getDoc(doc(db,"settings","ownerControl"));
+if(s.exists()) editingEnabled=s.data().editingEnabled===true;
+}catch(e){}
+
+const canEdit=isAdmin && editingEnabled;
+
+/* OWNER VERIFICATION */
+// const verified=localStorage.getItem("ownerVerified")==="true";
+
+// if(!verified && !isAdmin){
+// document.getElementById("codePopup").style.display="flex";
+// }else{
+// document.getElementById("ownerBar").style.display="block";
+// }
+
+
+/*  below is working code from 241 line to 274  */
+
+// const verified=localStorage.getItem("ownerVerified")==="true";
+
+// if(verified){
+// document.getElementById("ownerBar").style.display="block";
+// }
+
+// window.openOwnerLogin=()=>{
+// document.getElementById("codePopup").style.display="flex";
+// }
+
+
+
+
+
+// window.verifyCode=async()=>{
+// const entered=document.getElementById("codeInput").value.trim();
+
+// const snap=await getDocs(ownersRef);
+
+// let match=false;
+
+// snap.forEach(d=>{
+// if(d.data().ownerCode===entered){
+// match=true;
+// }
+// });
+
+// if(match){
+// localStorage.setItem("ownerVerified","true");
+// location.reload();
+// }else{
+// alert("Invalid Owner Code");
+// }
+// };
+
+
+
+
+
+/* ===== OWNER SESSION CONTROL ===== */
+
+const SESSION_LIMIT = 60 * 60 * 1000; 
+// ⏱ 1 Hour
+// Change if needed:
+// 30 min -> 30*60*1000
+// 2 hr   -> 2*60*60*1000
+
+function isOwnerSessionValid(){
+const verified = localStorage.getItem("ownerVerified")==="true";
+const loginTime = localStorage.getItem("ownerLoginTime");
+
+if(!verified || !loginTime) return false;
+
+const now = Date.now();
+return (now - parseInt(loginTime)) < SESSION_LIMIT;
+}
+
+// Show owner announcement if valid
+if(isOwnerSessionValid()){
+document.getElementById("ownerBar").style.display="block";
+}else{
+localStorage.removeItem("ownerVerified");
+localStorage.removeItem("ownerLoginTime");
+}
+
+/* ===== OWNER LOGIN BUTTON ===== */
+window.openOwnerLogin=()=>{
+document.getElementById("codePopup").style.display="flex";
+};
+
+/* ===== VERIFY CODE ===== */
+window.verifyCode=async()=>{
+const entered=document.getElementById("codeInput").value.trim();
+
+const snap=await getDocs(ownersRef);
+let match=false;
+
+snap.forEach(d=>{
+if(d.data().ownerCode===entered){
+match=true;
+}
+});
+
+if(match){
+localStorage.setItem("ownerVerified","true");
+localStorage.setItem("ownerLoginTime",Date.now());
+location.reload();
+}else{
+alert("Invalid Owner Code");
+}
+};
+
+
+
+
+/* RENDER */
+const wrap=document.getElementById("cards");
+
+onSnapshot(ownersRef,snap=>{
+wrap.innerHTML="";
+
+snap.forEach(d=>{
+const o=d.data();
+
+wrap.innerHTML+=`
+<div class="card">
+
+<img src="${o.ownerImg||''}">
+
+${canEdit?`
+<input id="n${d.id}" value="${o.ownerName||''}">
+<input id="t${d.id}" value="${o.teamName||''}">
+<button class="save" onclick="save('${d.id}')">Save</button>
+`
+:
+`
+<div class="name">${o.ownerName||''}</div>
+<div class="team">${o.teamName||''}</div>
+`
+}
+
+</div>`;
+});
+});
+
+/* SAVE */
+window.save=async(id)=>{
+await setDoc(doc(db,"owners",id),{
+ownerName:document.getElementById("n"+id).value,
+teamName:document.getElementById("t"+id).value
+},{merge:true});
+};
+
+
+
+localStorage.clear()
+// location.reload()
+
+
+</script>
+</body>
+</html>
