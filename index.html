@@ -217,7 +217,10 @@ header h1{font-size:16px}
 
 <footer>
   <p>👀 Website Visits: <b id="liveVisits">Loading...</b><br></p>
-🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.
+<p>
+🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.<br>
+📱 Version: <span id="appVersion"></span>
+</p>
 <div id="adminTrigger" style="text-align:center;font-size:12px;opacity:0.2">
 © JP Boys
 </div>
@@ -373,7 +376,7 @@ window.addEventListener('load', () => {
 
 
 <script>
-const APP_VERSION = "1.1"; // 🔥 change this when you update site
+const APP_VERSION = "1.2"; // 🔥 change this when you update site
 
 const savedVersion = localStorage.getItem("app_version");
 
@@ -393,7 +396,11 @@ if (savedVersion !== APP_VERSION) {
 </script>
  
 
+<script>
 
+
+document.getElementById("appVersion").innerText = APP_VERSION;
+</script>
 
 </body>
 </html>
