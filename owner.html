@@ -179,6 +179,9 @@ cursor:pointer;
 <!-- OWNER CODE POPUP -->
 <div class="popup" id="codePopup" style="display:none;">
 <div class="popupBox">
+<div style="text-align:right;">
+  <span onclick="closePopup()" style="cursor:pointer;font-size:18px;font-weight:bold;">❌</span>
+</div>
 <div><b>Enter Owner Code</b></div>
 <input id="codeInput" placeholder="Owner Code">
 <button onclick="verifyCode()">Submit</button>
@@ -376,7 +379,15 @@ teamName:document.getElementById("t"+id).value
 localStorage.clear()
 // location.reload()
 
+window.closePopup = () => {
+  document.getElementById("codePopup").style.display = "none";
+};
 
+document.getElementById("codePopup").addEventListener("click", (e) => {
+  if (e.target.id === "codePopup") {
+    closePopup();
+  }
+});
 </script>
 </body>
 </html>
