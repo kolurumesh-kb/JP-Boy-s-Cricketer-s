@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -435,3 +436,382 @@ render();
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP Boys Payment Tracker</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- 🔥 FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<style>
+/* SAME CSS (UNCHANGED) */
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:#0b1c2d;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+header{
+  background:#0d47a1;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+}
+.header-btns{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.header-btns button{
+  background:#ffd700;
+  padding:6px 10px;
+  border:none;
+  border-radius:5px;
+}
+.container{
+  padding:10px;
+  flex:1;
+}
+.form-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.form-row input,
+.form-row select{
+  flex:1 1 120px;
+  min-width:100px;
+  height:35px;
+  border:none;
+  border-radius:5px;
+  padding:5px;
+}
+.btn{
+  background:#4caf50;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:5px;
+}
+.table-container{
+  overflow-x:auto;
+}
+table{
+  min-width:600px;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  border:1px solid #444;
+  padding:8px;
+  text-align:center;
+}
+.green{color:#00e676;}
+.red{color:#ff5252;}
+.orange{color:orange;}
+footer{
+  background:#0d47a1;
+  text-align:center;
+  padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>🏏 JP Boys Payment Tracker</div>
+  <div class="header-btns">
+    <button onclick="goDashboard()">Dashboard</button>
+    <button onclick="login()">🔐 Finance Manager Login</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="form-row">
+  <input id="name" placeholder="Player Name">
+  <input id="amount" type="number" placeholder="Amount">
+
+  <select id="type">
+    <option value="credit">Payment</option>
+    <option value="debit" disabled>Expense</option>
+  </select>
+
+  <select id="months" multiple>
+    <option>Jan</option><option>Feb</option><option>Mar</option>
+    <option>Apr</option><option>May</option><option>Jun</option>
+    <option>Jul</option><option>Aug</option><option>Sep</option>
+    <option>Oct</option><option>Nov</option><option>Dec</option>
+  </select>
+
+  <select id="year">
+    <option>2026</option>
+    <option>2025</option>
+  </select>
+
+  <button class="btn" onclick="addEntry()">Add</button>
+</div>
+
+<h3>💰 Payments</h3>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Name</th><th>Months</th><th>Year</th><th>Amount</th><th>Status</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="paymentTable"></tbody>
+</table>
+</div>
+
+<h3>💸 Expenses</h3>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Name</th><th>Months</th><th>Year</th><th>Amount</th>
+</tr>
+</thead>
+<tbody id="expenseTable"></tbody>
+</table>
+</div>
+
+<h3 id="total"></h3>
+
+<button class="btn" onclick="downloadExcel()">Excel</button>
+<button class="btn" onclick="downloadPDF()">PDF</button>
+
+</div>
+
+<footer>🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.</footer>
+
+<script>
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+ apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+ authDomain:"jp-boys.firebaseapp.com",
+ projectId:"jp-boys"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let payments = [];
+let expenses = [];
+let isAdmin = false;
+
+function goDashboard(){
+  window.location.href="index.html";
+}
+
+function login(){
+  let code=prompt("Enter Manager Code");
+  if(code==="Umesh@09"){
+    isAdmin=true;
+    alert("Login Successful");
+    document.querySelector('#type option[value="debit"]').disabled=false;
+    render();
+  }else{
+    alert("Wrong Code");
+  }
+}
+
+function getMonths(){
+  let options=document.getElementById("months").options;
+  let selected=[];
+  for(let i=0;i<options.length;i++){
+    if(options[i].selected){
+      selected.push(options[i].value);
+    }
+  }
+  return selected;
+}
+
+async function loadData(){
+  payments=[];
+  expenses=[];
+
+  let pSnap=await db.collection("payments").orderBy("createdAt","desc").get();
+  pSnap.forEach(doc=>{
+    payments.push({id:doc.id,...doc.data()});
+  });
+
+  let eSnap=await db.collection("expenses").orderBy("createdAt","desc").get();
+  eSnap.forEach(doc=>{
+    expenses.push({id:doc.id,...doc.data()});
+  });
+
+  render();
+}
+
+async function addEntry(){
+  let name=document.getElementById("name").value;
+  let amount=document.getElementById("amount").value;
+  let type=document.getElementById("type").value;
+  let months=getMonths();
+  let year=document.getElementById("year").value;
+
+  if(!name || !amount || months.length===0){
+    alert("Fill all fields");
+    return;
+  }
+
+  if(type==="credit"){
+    await db.collection("payments").add({
+      name,
+      amount:Number(amount),
+      months,
+      year,
+      status:"pending",
+      createdAt:Date.now()
+    });
+  }else{
+    if(!isAdmin){
+      alert("Only admin can add expense");
+      return;
+    }
+
+    await db.collection("expenses").add({
+      name,
+      amount:Number(amount),
+      months,
+      year,
+      createdAt:Date.now()
+    });
+  }
+
+  /* 🔥 FIX: CLEAR FORM */
+  document.getElementById("name").value="";
+  document.getElementById("amount").value="";
+  document.getElementById("months").selectedIndex = -1;
+
+  loadData();
+}
+
+async function updateStatus(i,status){
+  let id = payments[i].id;
+  await db.collection("payments").doc(id).update({status});
+  loadData();
+}
+
+function render(){
+  let pHTML="", eHTML="";
+  let totalC=0, totalE=0;
+
+  payments.forEach((p,i)=>{
+    let statusClass="orange";
+    if(p.status==="Paid") statusClass="green";
+    if(p.status==="Rejected") statusClass="red";
+
+    if(p.status==="Paid") totalC+=Number(p.amount);
+
+    pHTML+=`
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.months.join(", ")}</td>
+      <td>${p.year}</td>
+      <td>₹${p.amount}</td>
+      <td class="${statusClass}">${p.status}</td>
+      <td>
+        ${isAdmin && p.status==="pending"
+        ? `<button onclick="updateStatus(${i},'Paid')">✔</button>
+           <button onclick="updateStatus(${i},'Rejected')">✖</button>`
+        : ""}
+      </td>
+    </tr>`;
+  });
+
+  expenses.forEach(e=>{
+    totalE+=Number(e.amount);
+
+    eHTML+=`
+    <tr>
+      <td>${e.name}</td>
+      <td>${e.months.join(", ")}</td>
+      <td>${e.year}</td>
+      <td>₹${e.amount}</td>
+    </tr>`;
+  });
+
+  document.getElementById("paymentTable").innerHTML=pHTML;
+  document.getElementById("expenseTable").innerHTML=eHTML;
+
+  document.getElementById("total").innerText=
+  `Total Credit ₹${totalC} | Expense ₹${totalE} | Balance ₹${totalC-totalE}`;
+}
+
+/* 🔥 EXCEL FIX */
+function downloadExcel(){
+  if(payments.length===0 && expenses.length===0){
+    alert("No data");
+    return;
+  }
+
+  let wb = XLSX.utils.book_new();
+
+  let ws1 = XLSX.utils.json_to_sheet(payments.map(p=>({
+    Name:p.name,
+    Months:p.months.join(", "),
+    Year:p.year,
+    Amount:p.amount,
+    Status:p.status
+  })));
+
+  let ws2 = XLSX.utils.json_to_sheet(expenses.map(e=>({
+    Name:e.name,
+    Months:e.months.join(", "),
+    Year:e.year,
+    Amount:e.amount
+  })));
+
+  XLSX.utils.book_append_sheet(wb, ws1, "Payments");
+  XLSX.utils.book_append_sheet(wb, ws2, "Expenses");
+
+  XLSX.writeFile(wb,"JP_Boys_Report.xlsx");
+}
+
+/* 🔥 PDF FIX */
+function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  let y=10;
+  doc.text("JP Boys Report",10,y);
+  y+=10;
+
+  payments.forEach(p=>{
+    doc.text(`${p.name} | ₹${p.amount} | ${p.status}`,10,y);
+    y+=6;
+  });
+
+  y+=10;
+
+  expenses.forEach(e=>{
+    doc.text(`${e.name} | ₹${e.amount}`,10,y);
+    y+=6;
+  });
+
+  doc.save("JP_Report.pdf");
+}
+
+window.onload = loadData;
+</script>
+
+</body>
+</html>
+>>>>>>> 201aa5b (updated all pages)

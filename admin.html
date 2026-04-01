@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 <head>
@@ -387,3 +388,420 @@ window.resetAuctionSeason = async () => {
 </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Control</title>
+
+<style>
+body{
+  background:#0b1c2d;
+  color:#fff;
+  font-family:Segoe UI;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.box{
+  background:#102840;
+  padding:20px;
+  border-radius:14px;
+  width:340px;
+}
+
+h3{text-align:center}
+
+label{
+  display:flex;
+  justify-content:space-between;
+  margin:12px 0;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button.green{background:green;color:#fff}
+button.yellow{background:#ffd700}
+button.red{background:#d9534f;color:#fff}
+button.blue{background:#3498db;color:#fff}
+
+input[type="password"],
+input[type="email"]{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-bottom:10px;
+}
+input[type="email"]{background:orange}
+
+/* ⭐ NEW NOTIFY PANEL */
+.notify{
+  background:#173d61;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:14px;
+  border-left:5px solid #ffd700;
+}
+
+.small{
+  font-size:13px;
+  opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="loginBox">
+  <h3>Admin Login</h3>
+  <input type="email" id="id" placeholder="Admin email">
+  <input type="password" id="pwd" placeholder="Admin Password">
+  <button class="green" onclick="login()">Login</button>
+</div>
+
+<div class="box" id="controlBox" style="display:none">
+
+  
+
+
+  <!-- ⭐ ADVANCED NOTIFICATION PANEL -->
+  <div class="notify">
+    <b>📊 Registration Status</b>
+    <div id="notifyContent">Loading...</div>
+  </div>
+
+  <h3>Auction Control</h3>
+
+<label>Auction ON <input type="checkbox" id="auctionToggle"></label>
+<label>Bidding Enabled <input type="checkbox" id="bidToggle"></label>
+<label>Enable Player Reset <input type="checkbox" id="resetToggle"></label>
+<label>Owner Editing <input type="checkbox" id="ownerToggle"></label>
+
+<button class="yellow" onclick="goVerify()">Verify Payments</button>
+
+<button class="red" id="toggleRegBtn">Disable Registration</button>
+
+<button class="green" onclick="goAuction()">Go to Auction</button>
+
+<button onclick="clearSoldPlayers()">Clear Sold Players</button>
+<button class="red" onclick="resetAllPlayers()">RESET ALL PLAYERS</button>
+<button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
+<button onclick="resetMonthlyKit()">Reset Monthly Kit Payments</button>
+
+</div>
+
+<script>
+document.getElementById("resetToggle").onchange = e =>
+  localStorage.setItem("playerResetEnabled", e.target.checked);
+
+document.getElementById("resetToggle").checked =
+  localStorage.getItem("playerResetEnabled") === "true";
+
+const ADMIN_PASSWORD = "Umesh@09";
+
+function login(){
+  if(document.getElementById("pwd").value === ADMIN_PASSWORD){
+    localStorage.setItem("isAdmin","true");
+    loginBox.style.display="none";
+    controlBox.style.display="block";
+    loadFlags();
+  }else alert("Wrong password");
+}
+
+function loadFlags(){
+  auctionToggle.checked=localStorage.getItem("auctionEnabled")==="true";
+  bidToggle.checked=localStorage.getItem("biddingEnabled")==="true";
+}
+
+auctionToggle.onchange=e=>localStorage.setItem("auctionEnabled",e.target.checked);
+bidToggle.onchange=e=>localStorage.setItem("biddingEnabled",e.target.checked);
+
+function goAuction(){ window.location.href="auction.html"; }
+function goVerify(){ window.location.href="verify.html"; }
+</script>
+
+
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  getDoc,  
+  deleteDoc,
+  doc,
+  updateDoc,
+  setDoc,
+  onSnapshot
+} from
+"https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
+  authDomain: "jp-boys.firebaseapp.com",
+  projectId: "jp-boys"
+});
+const db = getFirestore(app);
+
+
+
+
+
+/* =============================
+   GLOBAL REGISTRATION TOGGLE
+============================= */
+/* =============================
+   GLOBAL REGISTRATION TOGGLE
+   WITH CONFIRMATION MESSAGE
+============================= */
+
+const toggleBtn = document.getElementById("toggleRegBtn");
+
+async function refreshToggleText(){
+
+  const snap = await getDoc(doc(db,"settings","registration"));
+
+  const open = snap.exists()
+    ? snap.data().open !== false
+    : true;
+
+  toggleBtn.textContent = open
+    ? "Disable Registration"
+    : "Enable Registration";
+}
+
+
+/* CLICK HANDLER */
+
+toggleBtn.onclick = async ()=>{
+
+  const ref = doc(db,"settings","registration");
+  const snap = await getDoc(ref);
+
+  const open = snap.exists()
+    ? snap.data().open !== false
+    : true;
+
+  /* ⭐ Confirmation Dialog */
+  const confirmMsg = open
+    ? "Do you want to DISABLE registration?"
+    : "Do you want to ENABLE registration?";
+
+  if(!confirm(confirmMsg)) return;
+
+  /* ⭐ Update Firestore */
+  await setDoc(ref,{ open: !open },{ merge:true });
+
+  /* ⭐ Update Button Text */
+  refreshToggleText();
+};
+
+
+/* Initialize Button Text */
+refreshToggleText();
+
+
+
+
+/* 🔊 SOUND */
+function playAlert(){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.frequency.value=880;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime+0.6);
+}
+
+window.addEventListener("click",()=>{
+ const ctx=new(window.AudioContext||window.webkitAudioContext)();
+ ctx.resume();
+},{once:true});
+
+
+/* ⭐ REALTIME DASHBOARD STATUS */
+let initialized=false;
+
+onSnapshot(collection(db,"players"), snap=>{
+
+  const players=[];
+  snap.forEach(d=>players.push(d.data()));
+
+  players.sort((a,b)=>b.createdAt-a.createdAt);
+
+  const total=players.length;
+  const latest=players[0]?.name || "None";
+  const lastFive=players.slice(0,5);
+
+  notifyContent.innerHTML=`
+    Total Registered : <b>${total}</b><br>
+    Latest Player : <b>${latest}</b><br><br>
+
+    <div class="small">
+    Last 5 Registered:<br>
+    ${ lastFive.length
+      ? lastFive.map(p=>"• "+p.name).join("<br>")
+      : "No registrations yet"
+    }
+    </div>
+  `;
+
+  if(initialized){
+    playAlert();
+  }
+
+  initialized=true;
+});
+
+
+/* OWNER TOGGLE */
+ownerToggle.onchange = async e=>{
+ await setDoc(doc(db,"settings","ownerControl"),{
+   editingEnabled:e.target.checked
+ });
+};
+
+
+/* EXISTING FUNCTIONS — UNCHANGED */
+window.resetAllPlayers = async () => {
+ if(localStorage.getItem("isAdmin")!=="true") return;
+ if(localStorage.getItem("playerResetEnabled")!=="true"){
+   alert("Enable Player Reset first"); return;
+ }
+ if(!confirm("Delete ALL players?")) return;
+
+ const snap = await getDocs(collection(db,"players"));
+ for(const d of snap.docs){
+   await deleteDoc(doc(db,"players",d.id));
+ }
+ alert("All players deleted.");
+};
+
+window.clearSoldPlayers = async () => {
+ const snap = await getDocs(collection(db,"players"));
+ const jobs=[];
+ snap.forEach(d=>{
+   if(d.data().sold===true)
+     jobs.push(deleteDoc(doc(db,"players",d.id)));
+ });
+ await Promise.all(jobs);
+ alert("Sold players cleared");
+};
+
+// window.resetAuctionSeason = async () => {
+//  if(!confirm("Reset balances + sold data?")) return;
+
+//  const teamSnap = await getDocs(collection(db,"teams"));
+//  const jobs=[];
+
+//  teamSnap.forEach(t=>{
+//    jobs.push(updateDoc(doc(db,"teams",t.id),{
+//      money:100000,
+//      players:[]
+//    }));
+//  });
+
+//  const playerSnap = await getDocs(collection(db,"players"));
+//  playerSnap.forEach(p=>{
+//    jobs.push(updateDoc(doc(db,"players",p.id),{
+//      sold:false,
+//      soldAmount:null,
+//      soldTeam:null,
+//      soldAt:null
+//    }));
+//  });
+
+//  await Promise.all(jobs);
+//  alert("Auction fully reset ✅");
+// };
+
+
+
+
+
+window.resetAuctionSeason = async () => {
+
+ if(!confirm("Reset balances + sold data?")) return;
+
+ const jobs=[];
+
+ /* 1️⃣ Reset Team Money */
+ const teamSnap = await getDocs(collection(db,"teams"));
+ teamSnap.forEach(t=>{
+   jobs.push(updateDoc(doc(db,"teams",t.id),{
+     money:100000
+   }));
+ });
+
+ /* 2️⃣ Reset Player Sold Status */
+ const playerSnap = await getDocs(collection(db,"players"));
+ playerSnap.forEach(p=>{
+   jobs.push(updateDoc(doc(db,"players",p.id),{
+     sold:false,
+     soldAmount:null,
+     soldTeam:null,
+     soldAt:null
+   }));
+ });
+
+ /* 3️⃣ 🔥 IMPORTANT — DELETE teamPlayers COLLECTION */
+ const teamPlayersSnap = await getDocs(collection(db,"teamPlayers"));
+ teamPlayersSnap.forEach(tp=>{
+   jobs.push(deleteDoc(doc(db,"teamPlayers",tp.id)));
+ });
+
+ await Promise.all(jobs);
+
+ alert("Auction fully reset ✅ (Balances + Sold Data Cleared)");
+
+};
+
+
+/* Monthlykitpayment*/
+
+window.resetMonthlyKit = async function(){
+  const confirmReset = confirm("Are you sure you want to reset all Monthly Kit Payments?");
+  if(!confirmReset) return;
+
+  try{
+    const paymentsSnap = await getDocs(collection(db,"payments"));
+    const paymentDeletes = paymentsSnap.docs.map(d =>
+      deleteDoc(doc(db,"payments", d.id))
+    );
+
+    const expensesSnap = await getDocs(collection(db,"expenses"));
+    const expenseDeletes = expensesSnap.docs.map(d =>
+      deleteDoc(doc(db,"expenses", d.id))
+    );
+
+    await Promise.all([...paymentDeletes, ...expenseDeletes]);
+
+    alert("Monthly Kit Payments Reset Successfully ✅");
+
+  }catch(error){
+    console.error(error);
+    alert("Error while resetting ❌");
+  }
+};
+
+
+
+</script>
+</body>
+</html>
+>>>>>>> 201aa5b (updated all pages)
