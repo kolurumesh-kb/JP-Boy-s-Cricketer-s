@@ -27,7 +27,9 @@ header{
   justify-content:space-between;
 }
 
+
 .header-btns button{
+ background:#ffd700;
   margin-left:8px;
   padding:6px 10px;
   border:none;
@@ -100,8 +102,10 @@ footer{
   <div>🏏 JP Boys Payment Tracker</div>
   <div class="header-btns">
     <button onclick="goDashboard()"> Dashboard</button>
-    <button onclick="login()">🔐 Login</button>
+    <button onclick="login()">🔐 Finance Manager Login</button>
   </div>
+
+  
 </header>
 
 <div class="container">
@@ -171,7 +175,7 @@ function goDashboard(){
 // LOGIN
 function login(){
   let code=prompt("Enter Manager Code");
-  if(code==="1234"){
+  if(code==="Umesh@09"){
     isAdmin=true;
     alert("Login Successful ✅");
     document.querySelector('#type option[value="debit"]').disabled=false;
