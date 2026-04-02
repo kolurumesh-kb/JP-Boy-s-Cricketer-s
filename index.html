@@ -326,6 +326,10 @@ document.getElementById("seasonAnnouncement").style.display="none";
 
 
 <!-- REALTIME VISIT COUNTER -->
+<!-- ONLY showing changed parts clearly, rest remains same -->
+
+<!-- ================= VERSION + UPDATE FIX ================= -->
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import {
@@ -340,6 +344,9 @@ projectId:"jp-boys"
 });
 
 const db = getFirestore(app);
+
+/* ================= VISIT COUNTER (UNCHANGED) ================= */
+
 const visitRef = doc(db,"siteStats","visits");
 const VISIT_FLAG="jp_counted_visit";
 
@@ -365,47 +372,77 @@ if(el) el.innerText=d.data().count;
 
 registerVisit();
 
-
-
+/* ================= VERSION + UPDATE ================= */
 
 const CURRENT_VERSION = "2.0"; // 🔥 change when APK updated
 
 async function checkVersion(){
-  const snap = await getDoc(doc(db,"settings","app"));
 
+  // Always show version in footer
+  document.getElementById("appVersion").innerText = CURRENT_VERSION;
+
+  const snap = await getDoc(doc(db,"settings","app"));
   if(!snap.exists()) return;
 
   const latestVersion = snap.data().version;
 
   if(latestVersion !== CURRENT_VERSION){
-    
-    alert("🚨 New Update Required!\nPlease install latest app to continue.");
 
-    // 🔥 FORCE STOP USAGE
+    // FULL SCREEN UPDATE UI
     document.body.innerHTML = `
       <div style="
         height:100vh;
         display:flex;
         align-items:center;
         justify-content:center;
-        background:#000;
+        background:linear-gradient(135deg,#000,#1a237e);
         color:#fff;
         text-align:center;
         padding:20px;
+        font-family:Poppins;
       ">
-        <div>
-          <h2>Update Required 🚀</h2>
-          <p>Please install latest version to use app</p>
+        <div style="
+          background:#111;
+          padding:30px 20px;
+          border-radius:16px;
+          box-shadow:0 0 20px rgba(0,0,0,0.6);
+          max-width:320px;
+        ">
+          <h2 style="color:#ffeb3b;">🚀 Update Available</h2>
+
+          <p style="margin:12px 0;">
+            New version <b>${latestVersion}</b> is available.
+          </p>
+
+          <p style="font-size:14px;color:#bbb;">
+            Please update the app to continue using JP Boy's Cricketer's.
+          </p>
+
+          <button onclick="location.reload()" style="
+            margin-top:18px;
+            padding:10px 16px;
+            border:none;
+            border-radius:8px;
+            background:#ffeb3b;
+            color:#000;
+            font-weight:bold;
+            cursor:pointer;
+          ">
+            🔄 Refresh After Update
+          </button>
         </div>
       </div>
     `;
   }
-
-  document.getElementById("appVersion").innerText = CURRENT_VERSION;
 }
 
 checkVersion();
+
 </script>
+
+<!-- ================= REMOVE OLD BUG LINE ================= -->
+<!-- ❌ DELETE THIS LINE FROM YOUR FILE -->
+<!-- document.getElementById("appVersion").innerText = APP_VERSION; -->
 
 
 <!-- <script>
