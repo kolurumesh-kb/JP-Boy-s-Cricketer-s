@@ -665,6 +665,43 @@ setTimeout(()=>{
 </div>
 
 <script>
+// document.addEventListener("deviceready", async () => {
+
+//   const { PushNotifications } = Capacitor.Plugins;
+
+//   const perm = await PushNotifications.requestPermissions();
+
+//   if (perm.receive === 'granted') {
+//     await PushNotifications.register();
+//   }
+
+//   PushNotifications.addListener('registration', async (token) => {
+
+//     console.log("🔥 TOKEN:", token.value);
+
+//     try {
+//       await fetch("https://iid.googleapis.com/iid/v1/" + token.value + "/rel/topics/allUsers", {
+//         method: "POST",
+//         headers: {
+//           "Authorization": "key=YOUR_SERVER_KEY"
+//         }
+//       });
+
+//       console.log("✅ Subscribed to allUsers");
+
+//     } catch (e) {
+//       console.log("❌ Topic subscription failed (ignore for now)");
+//     }
+
+//   });
+
+//   PushNotifications.addListener('pushNotificationReceived', notification => {
+//     console.log("🔔 Notification:", notification);
+//   });
+
+// });
+
+
 document.addEventListener("deviceready", async () => {
 
   const { PushNotifications } = Capacitor.Plugins;
@@ -679,19 +716,10 @@ document.addEventListener("deviceready", async () => {
 
     console.log("🔥 TOKEN:", token.value);
 
-    try {
-      await fetch("https://iid.googleapis.com/iid/v1/" + token.value + "/rel/topics/allUsers", {
-        method: "POST",
-        headers: {
-          "Authorization": "key=YOUR_SERVER_KEY"
-        }
-      });
+    // ✅ Save token
+    localStorage.setItem("fcmToken", token.value);
 
-      console.log("✅ Subscribed to allUsers");
-
-    } catch (e) {
-      console.log("❌ Topic subscription failed (ignore for now)");
-    }
+    console.log("✅ Token saved successfully");
 
   });
 
@@ -700,6 +728,8 @@ document.addEventListener("deviceready", async () => {
   });
 
 });
+
+
 </script>
 
 
