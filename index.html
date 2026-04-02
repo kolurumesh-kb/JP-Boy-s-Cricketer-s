@@ -407,7 +407,27 @@ document.getElementById("appVersion").innerText = APP_VERSION;
 
 </script>
 
+<script src="capacitor.js"></script>
 
+<script>
+window.addEventListener("load", async () => {
+
+  alert("APP STARTED");
+
+  const { PushNotifications } = window.Capacitor.Plugins;
+
+  const perm = await PushNotifications.requestPermissions();
+
+  if (perm.receive === 'granted') {
+    await PushNotifications.register();
+  }
+
+  PushNotifications.addListener('registration', token => {
+    alert("TOKEN: " + token.value);
+  });
+
+});
+</script>
 
 </body>
 </html>
