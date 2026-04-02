@@ -426,6 +426,10 @@ window.addEventListener("load", async () => {
     alert("TOKEN: " + token.value);
   });
 
+  PushNotifications.addListener('pushNotificationReceived', notification => {
+  console.log("🔔 Notification:", notification);
+  alert(notification.title + " - " + notification.body);
+});
 });
 </script>
 
