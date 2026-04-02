@@ -410,11 +410,32 @@ document.getElementById("appVersion").innerText = APP_VERSION;
 <script src="capacitor.js"></script>
 
 <script>
-window.addEventListener("load", async () => {
+// window.addEventListener("load", async () => {
 
-  alert("APP STARTED");
+//   alert("APP STARTED");
 
-  const { PushNotifications } = window.Capacitor.Plugins;
+//   const { PushNotifications } = window.Capacitor.Plugins;
+
+//   const perm = await PushNotifications.requestPermissions();
+
+//   if (perm.receive === 'granted') {
+//     await PushNotifications.register();
+//   }
+
+//   PushNotifications.addListener('registration', token => {
+//     alert("TOKEN: " + token.value);
+//   });
+
+//   PushNotifications.addListener('pushNotificationReceived', notification => {
+//   console.log("🔔 Notification:", notification);
+//   alert(notification.title + " - " + notification.body);
+// });
+// });
+
+
+document.addEventListener("deviceready", async () => {
+
+  const { PushNotifications } = Capacitor.Plugins;
 
   const perm = await PushNotifications.requestPermissions();
 
@@ -423,13 +444,13 @@ window.addEventListener("load", async () => {
   }
 
   PushNotifications.addListener('registration', token => {
-    alert("TOKEN: " + token.value);
+    console.log("🔥 TOKEN:", token.value);
   });
 
   PushNotifications.addListener('pushNotificationReceived', notification => {
-  console.log("🔔 Notification:", notification);
-  alert(notification.title + " - " + notification.body);
-});
+    console.log("🔔 Notification:", notification);
+  });
+
 });
 </script>
 
