@@ -733,10 +733,12 @@ setTimeout(()=>{
 
 
 
-document.addEventListener("deviceready", async () => {
+window.addEventListener("load", async () => {
+
+  console.log("🔥 Push init started");
 
   if (!window.Capacitor) {
-    console.log("❌ Not running inside app");
+    console.log("❌ Not app environment");
     return;
   }
 
@@ -745,32 +747,28 @@ document.addEventListener("deviceready", async () => {
   const perm = await PushNotifications.requestPermissions();
 
   if (perm.receive !== 'granted') {
-    console.log("❌ Permission denied");
+    alert("Enable notifications bro");
     return;
   }
 
   await PushNotifications.register();
 
-PushNotifications.addListener('registration', async (token) => {
+  PushNotifications.addListener('registration', async (token) => {
 
-  console.log("🔥 TOKEN:", token.value);
+    console.log("🔥 TOKEN:", token.value);
 
-  try {
-    await setDoc(doc(db, "fcmTokens", token.value), {
-      token: token.value,
-      createdAt: Date.now()
-    });
+    try {
+      await setDoc(doc(db, "fcmTokens", token.value), {
+        token: token.value,
+        createdAt: Date.now()
+      });
 
-    console.log("✅ Token saved to Firestore");
+      console.log("✅ Token saved");
 
-  } catch (e) {
-    console.log("❌ Token save failed", e);
-  }
+    } catch (e) {
+      console.log("❌ Save failed", e);
+    }
 
-});
-
-  PushNotifications.addListener('pushNotificationReceived', notification => {
-    console.log("🔔 Notification:", notification);
   });
 
 });
