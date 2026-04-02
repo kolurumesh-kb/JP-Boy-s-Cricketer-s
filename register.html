@@ -702,24 +702,71 @@ setTimeout(()=>{
 // });
 
 
+// document.addEventListener("deviceready", async () => {
+
+//   const { PushNotifications } = Capacitor.Plugins;
+
+//   const perm = await PushNotifications.requestPermissions();
+
+//   if (perm.receive === 'granted') {
+//     await PushNotifications.register();
+//   }
+
+//   PushNotifications.addListener('registration', async (token) => {
+
+//     console.log("🔥 TOKEN:", token.value);
+
+//     // ✅ Save token
+//     localStorage.setItem("fcmToken", token.value);
+
+//     console.log("✅ Token saved successfully");
+
+//   });
+
+//   PushNotifications.addListener('pushNotificationReceived', notification => {
+//     console.log("🔔 Notification:", notification);
+//   });
+
+// });
+
+
+
+
+
 document.addEventListener("deviceready", async () => {
+
+  if (!window.Capacitor) {
+    console.log("❌ Not running inside app");
+    return;
+  }
 
   const { PushNotifications } = Capacitor.Plugins;
 
   const perm = await PushNotifications.requestPermissions();
 
-  if (perm.receive === 'granted') {
-    await PushNotifications.register();
+  if (perm.receive !== 'granted') {
+    console.log("❌ Permission denied");
+    return;
   }
+
+  await PushNotifications.register();
 
   PushNotifications.addListener('registration', async (token) => {
 
     console.log("🔥 TOKEN:", token.value);
 
-    // ✅ Save token
     localStorage.setItem("fcmToken", token.value);
 
-    console.log("✅ Token saved successfully");
+    // OPTIONAL: save in Firebase for targeting
+    try{
+      await fetch("https://your-backend-api/save-token", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token:token.value})
+      });
+    }catch(e){
+      console.log("Token save skipped");
+    }
 
   });
 
@@ -728,7 +775,6 @@ document.addEventListener("deviceready", async () => {
   });
 
 });
-
 
 </script>
 
