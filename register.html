@@ -366,7 +366,7 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <script type="module">
 /* ⭐ SAME SCRIPT — UNCHANGED */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc ,getDocs, doc, onSnapshot}
+import { getFirestore, collection, addDoc ,getDocs, doc, onSnapshot,setDoc}
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -751,24 +751,23 @@ document.addEventListener("deviceready", async () => {
 
   await PushNotifications.register();
 
-  PushNotifications.addListener('registration', async (token) => {
+PushNotifications.addListener('registration', async (token) => {
 
-    console.log("🔥 TOKEN:", token.value);
+  console.log("🔥 TOKEN:", token.value);
 
-    localStorage.setItem("fcmToken", token.value);
+  try {
+    await setDoc(doc(db, "fcmTokens", token.value), {
+      token: token.value,
+      createdAt: Date.now()
+    });
 
-    // OPTIONAL: save in Firebase for targeting
-    try{
-      await fetch("https://your-backend-api/save-token", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({token:token.value})
-      });
-    }catch(e){
-      console.log("Token save skipped");
-    }
+    console.log("✅ Token saved to Firestore");
 
-  });
+  } catch (e) {
+    console.log("❌ Token save failed", e);
+  }
+
+});
 
   PushNotifications.addListener('pushNotificationReceived', notification => {
     console.log("🔔 Notification:", notification);
