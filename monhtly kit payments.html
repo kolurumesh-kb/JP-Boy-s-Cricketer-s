@@ -8,12 +8,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- 🔥 FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
-/* SAME CSS (UNCHANGED) */
 body{
   margin:0;
   font-family:Segoe UI;
@@ -67,23 +65,39 @@ header{
   padding:6px 10px;
   border-radius:5px;
 }
+
+/* ✅ SCROLL FIX */
 .table-container{
   overflow-x:auto;
+  overflow-y:auto;
+  max-height:300px;
+  border:1px solid #444;
 }
+
+/* TABLE */
 table{
   min-width:600px;
   width:100%;
   border-collapse:collapse;
-  margin-top:15px;
 }
 th,td{
   border:1px solid #444;
   padding:8px;
   text-align:center;
 }
+
+/* ✅ STICKY HEADER */
+thead th{
+  position:sticky;
+  top:0;
+  background:#0d47a1;
+  z-index:2;
+}
+
 .green{color:#00e676;}
 .red{color:#ff5252;}
 .orange{color:orange;}
+
 footer{
   background:#0d47a1;
   text-align:center;
@@ -122,7 +136,7 @@ footer{
 
   <select id="year">
     <option>2026</option>
-    <option>2025</option>
+    <option>2027</option>
   </select>
 
   <button class="btn" onclick="addEntry()">Add</button>
@@ -162,7 +176,6 @@ footer{
 <footer>🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.</footer>
 
 <script>
-/* FIREBASE CONFIG */
 const firebaseConfig = {
  apiKey:"AIzaSyBdlkwG56G7QJSWR9SI2e1LarOUxWg8lW4",
  authDomain:"jp-boys.firebaseapp.com",
@@ -175,6 +188,7 @@ const db = firebase.firestore();
 let payments = [];
 let expenses = [];
 let isAdmin = false;
+let editIndex = null;
 
 function goDashboard(){
   window.location.href="index.html";
@@ -256,7 +270,6 @@ async function addEntry(){
     });
   }
 
-  /* 🔥 FIX: CLEAR FORM */
   document.getElementById("name").value="";
   document.getElementById("amount").value="";
   document.getElementById("months").selectedIndex = -1;
@@ -267,6 +280,39 @@ async function addEntry(){
 async function updateStatus(i,status){
   let id = payments[i].id;
   await db.collection("payments").doc(id).update({status});
+  loadData();
+}
+
+/* 🔥 ROW-WISE EDIT */
+function editRow(i){
+  editIndex = i;
+  render();
+}
+
+function cancelEdit(){
+  editIndex = null;
+  render();
+}
+
+async function saveRow(i){
+  let id = payments[i].id;
+
+  let row = document.querySelectorAll("#paymentTable tr")[i];
+
+  let name = row.querySelector(".edit-name").value;
+  let months = row.querySelector(".edit-months").value.split(",");
+  let year = row.querySelector(".edit-year").value;
+  let amount = row.querySelector(".edit-amount").value;
+
+  await db.collection("payments").doc(id).update({
+    name,
+    months,
+    year,
+    amount:Number(amount)
+  });
+
+  alert("Row Updated ✅");
+  editIndex = null;
   loadData();
 }
 
@@ -281,25 +327,40 @@ function render(){
 
     if(p.status==="Paid") totalC+=Number(p.amount);
 
-    pHTML+=`
-    <tr>
-      <td>${p.name}</td>
-      <td>${p.months.join(", ")}</td>
-      <td>${p.year}</td>
-      <td>₹${p.amount}</td>
-      <td class="${statusClass}">${p.status}</td>
-      <td>
-        ${isAdmin && p.status==="pending"
-        ? `<button onclick="updateStatus(${i},'Paid')">✔</button>
-           <button onclick="updateStatus(${i},'Rejected')">✖</button>`
-        : ""}
-      </td>
-    </tr>`;
+    if(editIndex===i){
+      pHTML+=`
+      <tr>
+        <td><input class="edit-name" value="${p.name}"></td>
+        <td><input class="edit-months" value="${p.months.join(",")}"></td>
+        <td><input class="edit-year" value="${p.year}"></td>
+        <td><input type="number" class="edit-amount" value="${p.amount}"></td>
+        <td class="orange">Editing...</td>
+        <td>
+          <button onclick="saveRow(${i})">💾</button>
+          <button onclick="cancelEdit()">❌</button>
+        </td>
+      </tr>`;
+    } else {
+      pHTML+=`
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.months.join(", ")}</td>
+        <td>${p.year}</td>
+        <td>₹${p.amount}</td>
+        <td class="${statusClass}">${p.status}</td>
+        <td>
+          ${isAdmin && p.status==="pending"
+          ? `<button onclick="updateStatus(${i},'Paid')">✔</button>
+             <button onclick="updateStatus(${i},'Rejected')">✖</button>`
+          : ""}
+          <button onclick="editRow(${i})">✏️</button>
+        </td>
+      </tr>`;
+    }
   });
 
   expenses.forEach(e=>{
     totalE+=Number(e.amount);
-
     eHTML+=`
     <tr>
       <td>${e.name}</td>
@@ -316,54 +377,22 @@ function render(){
   `Total Credit ₹${totalC} | Expense ₹${totalE} | Balance ₹${totalC-totalE}`;
 }
 
-/* 🔥 EXCEL FIX */
 function downloadExcel(){
-  if(payments.length===0 && expenses.length===0){
-    alert("No data");
-    return;
-  }
-
   let wb = XLSX.utils.book_new();
-
-  let ws1 = XLSX.utils.json_to_sheet(payments.map(p=>({
-    Name:p.name,
-    Months:p.months.join(", "),
-    Year:p.year,
-    Amount:p.amount,
-    Status:p.status
-  })));
-
-  let ws2 = XLSX.utils.json_to_sheet(expenses.map(e=>({
-    Name:e.name,
-    Months:e.months.join(", "),
-    Year:e.year,
-    Amount:e.amount
-  })));
-
+  let ws1 = XLSX.utils.json_to_sheet(payments);
+  let ws2 = XLSX.utils.json_to_sheet(expenses);
   XLSX.utils.book_append_sheet(wb, ws1, "Payments");
   XLSX.utils.book_append_sheet(wb, ws2, "Expenses");
-
   XLSX.writeFile(wb,"JP_Boys_Report.xlsx");
 }
 
-/* 🔥 PDF FIX */
 function downloadPDF(){
   const { jsPDF } = window.jspdf;
   let doc = new jsPDF();
-
   let y=10;
-  doc.text("JP Boys Report",10,y);
-  y+=10;
 
   payments.forEach(p=>{
-    doc.text(`${p.name} | ₹${p.amount} | ${p.status}`,10,y);
-    y+=6;
-  });
-
-  y+=10;
-
-  expenses.forEach(e=>{
-    doc.text(`${e.name} | ₹${e.amount}`,10,y);
+    doc.text(`${p.name} ₹${p.amount}`,10,y);
     y+=6;
   });
 
