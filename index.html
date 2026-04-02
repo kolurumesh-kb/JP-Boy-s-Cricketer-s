@@ -364,6 +364,47 @@ if(el) el.innerText=d.data().count;
 });
 
 registerVisit();
+
+
+
+
+const CURRENT_VERSION = "2.0"; // 🔥 change when APK updated
+
+async function checkVersion(){
+  const snap = await getDoc(doc(db,"settings","app"));
+
+  if(!snap.exists()) return;
+
+  const latestVersion = snap.data().version;
+
+  if(latestVersion !== CURRENT_VERSION){
+    
+    alert("🚨 New Update Required!\nPlease install latest app to continue.");
+
+    // 🔥 FORCE STOP USAGE
+    document.body.innerHTML = `
+      <div style="
+        height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#000;
+        color:#fff;
+        text-align:center;
+        padding:20px;
+      ">
+        <div>
+          <h2>Update Required 🚀</h2>
+          <p>Please install latest version to use app</p>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("appVersion").innerText = CURRENT_VERSION;
+}
+
+checkVersion();
 </script>
 
 
@@ -377,7 +418,7 @@ window.addEventListener('load', () => {
 
 
 
-<script>
+<!-- <script>
 const APP_VERSION = "1.7"; // 🔥 change this when you update site
 
 const savedVersion = localStorage.getItem("app_version");
@@ -392,10 +433,10 @@ if (savedVersion !== APP_VERSION) {
   // Reload only once
   location.reload();
 }
-</script> 
+</script>  -->
 
 
-</script>
+<!-- </script> -->
  
 
 <script>
