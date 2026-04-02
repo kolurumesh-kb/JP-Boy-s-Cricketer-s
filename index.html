@@ -476,21 +476,26 @@ document.getElementById("appVersion").innerText = APP_VERSION;
 
 document.addEventListener("deviceready", async () => {
 
-  const { PushNotifications } = Capacitor.Plugins;
+  PushNotifications.addListener('registration', async (token) => {
 
-  const perm = await PushNotifications.requestPermissions();
+  console.log("🔥 TOKEN:", token.value);
 
-  if (perm.receive === 'granted') {
-    await PushNotifications.register();
+  try {
+    const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js");
+    const db = getFirestore();
+
+    await setDoc(doc(db, "fcmTokens", token.value), {
+      token: token.value,
+      createdAt: Date.now()
+    });
+
+    console.log("✅ Token saved to Firestore");
+
+  } catch (e) {
+    console.log("❌ Token save failed", e);
   }
 
-  PushNotifications.addListener('registration', token => {
-    console.log("🔥 TOKEN:", token.value);
-  });
-
-  PushNotifications.addListener('pushNotificationReceived', notification => {
-    console.log("🔔 Notification:", notification);
-  });
+});
 
 });
 </script>
