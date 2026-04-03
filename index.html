@@ -374,21 +374,28 @@ registerVisit();
 
 /* ================= VERSION + UPDATE ================= */
 
-const CURRENT_VERSION = "2.0"; // 🔥 change when APK updated
+const CURRENT_VERSION = "2.1";
 
 async function checkVersion(){
 
-  // Always show version in footer
   document.getElementById("appVersion").innerText = CURRENT_VERSION;
 
   const snap = await getDoc(doc(db,"settings","app"));
-  if(!snap.exists()) return;
+  if(!snap.exists()) {
+    console.log("❌ No version doc found");
+    return;
+  }
 
-  const latestVersion = snap.data().version;
+  const latestVersion = String(snap.data().version).trim();
+  const currentVersion = String(CURRENT_VERSION).trim();
 
-  if(latestVersion !== CURRENT_VERSION){
+  console.log("🔥 App Version:", currentVersion);
+  console.log("🔥 Firestore Version:", latestVersion);
 
-    // FULL SCREEN UPDATE UI
+  if(latestVersion !== currentVersion){
+
+    alert("🚨 New Update Available!");
+
     document.body.innerHTML = `
       <div style="
         height:100vh;
@@ -399,43 +406,15 @@ async function checkVersion(){
         color:#fff;
         text-align:center;
         padding:20px;
-        font-family:Poppins;
       ">
-        <div style="
-          background:#111;
-          padding:30px 20px;
-          border-radius:16px;
-          box-shadow:0 0 20px rgba(0,0,0,0.6);
-          max-width:320px;
-        ">
-          <h2 style="color:#ffeb3b;">🚀 Update Available</h2>
-
-          <p style="margin:12px 0;">
-            New version <b>${latestVersion}</b> is available.
-          </p>
-
-          <p style="font-size:14px;color:#bbb;">
-            Please update the app to continue using JP Boy's Cricketer's.
-          </p>
-
-          <button onclick="location.reload()" style="
-            margin-top:18px;
-            padding:10px 16px;
-            border:none;
-            border-radius:8px;
-            background:#ffeb3b;
-            color:#000;
-            font-weight:bold;
-            cursor:pointer;
-          ">
-            🔄 Refresh After Update
-          </button>
+        <div>
+          <h2>⚠ Update Required</h2>
+          <p>New version ${latestVersion} available</p>
         </div>
       </div>
     `;
   }
 }
-
 checkVersion();
 
 </script>
@@ -476,14 +455,14 @@ if (savedVersion !== APP_VERSION) {
 <!-- </script> -->
  
 
-<script>
+<!-- <script>
 
 
 document.getElementById("appVersion").innerText = APP_VERSION;
 
 
 
-</script>
+</script> -->
 
 <script src="capacitor.js"></script>
 
