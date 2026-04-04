@@ -422,7 +422,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebas
 import {
 getFirestore, doc, getDoc, setDoc,
 updateDoc, onSnapshot, increment,
-collection, orderBy, query
+collection, orderBy, query, limit
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -489,7 +489,11 @@ function playNotificationSound(){
 
 try{
 
-const q = query(collection(db,"notifications"), orderBy("time","desc"));
+const q = query(
+  collection(db,"notifications"),
+  orderBy("time","desc"),
+  limit(5) // 🔥 only latest 5
+);
 
 onSnapshot(q,(snap)=>{
 
