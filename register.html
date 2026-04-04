@@ -564,7 +564,8 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
 await addDoc(collection(db,"notifications"), {
   title: "🆕 New Player Registered",
   body: nameInput.value.trim() + " has registered for Season-4 🏏",
-  time: Date.now()
+  time: Date.now(),
+  type: "player_registration"   // ✅ IMPORTANT
 });
 
 
