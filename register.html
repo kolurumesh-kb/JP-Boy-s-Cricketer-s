@@ -559,6 +559,15 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
 
 });
 
+/* 🔔 SEND NOTIFICATION TO DASHBOARD */
+
+await addDoc(collection(db,"notifications"), {
+  title: "🆕 New Player Registered",
+  body: nameInput.value.trim() + " has registered for Season-4 🏏",
+  time: Date.now()
+});
+
+
   loader.style.display="none";
   // alert("✅ Congratulations Your Registration Successfully Completed ");
   // location.reload();
