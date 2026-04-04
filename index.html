@@ -456,7 +456,7 @@ if(el) el.innerText=d.data().count || 0;
 
 /* ================= VERSION SAFE ================= */
 
-const CURRENT_VERSION = "2.2";
+const CURRENT_VERSION = "2.3";
 
 async function checkVersion(){
 
@@ -473,9 +473,23 @@ async function checkVersion(){
 
     const latestVersion = String(snap.data().version || "").trim();
 
-    if(latestVersion && latestVersion !== CURRENT_VERSION){
-      alert("🚨 New Update Available!");
-    }
+    // if(latestVersion && latestVersion !== CURRENT_VERSION){
+    //   alert("🚨 New Update Available!");
+    // }
+
+    const seenVersion = localStorage.getItem("seen_update_version");
+
+if(latestVersion && latestVersion !== CURRENT_VERSION){
+
+  // ✅ show alert only if not already shown
+  if(seenVersion !== latestVersion){
+
+    alert("🚨 New Update Available!");
+
+    // ✅ save that alert shown for this version
+    localStorage.setItem("seen_update_version", latestVersion);
+  }
+}
 
   }catch(e){
     console.log("❌ Version check error", e);
