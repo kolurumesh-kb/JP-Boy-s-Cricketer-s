@@ -725,6 +725,7 @@ window.addEventListener("load", async () => {
 
   await PushNotifications.register();
 
+  // ✅ TOKEN SAVE
   PushNotifications.addListener('registration', async (token) => {
 
     console.log("🔥 TOKEN:", token.value);
@@ -739,6 +740,25 @@ window.addEventListener("load", async () => {
 
     } catch (e) {
       console.log("❌ Save failed", e);
+    }
+
+  });
+
+  // ✅ ✅ CORRECT PLACE (OUTSIDE)
+  PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+
+    console.log("📲 Notification Clicked:", notification);
+
+    const box = document.getElementById("notificationBox");
+
+    if(box){
+      box.style.display = "block";
+      box.scrollTop = 0; // optional smooth UX
+    }
+
+    const notifCountEl = document.getElementById("notifCount");
+    if(notifCountEl){
+      notifCountEl.style.display = "none";
     }
 
   });
