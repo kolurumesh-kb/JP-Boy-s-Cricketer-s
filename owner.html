@@ -12,6 +12,7 @@ background:linear-gradient(90deg,#1976d2,#512da8);
 color:#fff;padding:14px;
 display:flex;justify-content:space-between;
 align-items:center;font-weight:bold;
+position:relative;
 }
 
 header button{
@@ -103,7 +104,6 @@ display:none;
 animation:scrollText 28s linear infinite;
 }
 
-
 @keyframes scrollText{
 0%{transform:translateX(0);}
 100%{transform:translateX(-100%);}
@@ -128,18 +128,39 @@ text-align:center;
 width:260px;
 }
 
-.popupBox input{
-margin-top:10px;
+/* 🔔 NOTIFICATION */
+#notificationBell{
+font-size:22px;
+cursor:pointer;
+position:relative;
 }
 
-.popupBox button{
-margin-top:10px;
-background:#1976d2;
-color:white;
-border:none;
-padding:8px 14px;
-border-radius:6px;
-cursor:pointer;
+#notifCount{
+position:absolute;
+top:-6px;
+right:-10px;
+background:red;
+color:#fff;
+font-size:10px;
+padding:2px 6px;
+border-radius:50%;
+display:none;
+}
+
+#notificationBox{
+position:absolute;
+top:70px;
+right:10px;
+width:320px;
+max-height:400px;
+overflow-y:auto;
+background:#111;
+color:#fff;
+border-radius:12px;
+display:none;
+z-index:2000;
+box-shadow:0 0 12px rgba(0,0,0,0.6);
+padding:12px;
 }
 </style>
 </head>
@@ -150,17 +171,22 @@ cursor:pointer;
 <button onclick="location.href='index.html'">Dashboard</button>
 <div>Team Owners</div>
 
-
-<!-- <div></div> -->
-
-<div>
+<div style="display:flex;align-items:center;gap:10px;position:relative;">
 <button onclick="openOwnerLogin()">Owner Login</button>
+
+<!-- 🔔 NEW -->
+<div id="notificationBell" onclick="toggleNotifications()">
+  🔔
+  <span id="notifCount">0</span>
 </div>
-
-
-
-
+</div>
 </header>
+
+<!-- 🔔 NEW -->
+<div id="notificationBox">
+  <h3>📢 Notifications</h3>
+  <div id="notifList">Loading...</div>
+</div>
 
 <!-- PUBLIC ANNOUNCEMENT -->
 <div class="announcement">
@@ -195,7 +221,6 @@ cursor:pointer;
 </footer>
 
 <script type="module">
-
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 
@@ -206,7 +231,9 @@ doc,
 setDoc,
 onSnapshot,
 getDoc,
-getDocs
+getDocs,
+query,
+orderBy
 } from
 "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
@@ -229,64 +256,9 @@ if(s.exists()) editingEnabled=s.data().editingEnabled===true;
 
 const canEdit=isAdmin && editingEnabled;
 
-/* OWNER VERIFICATION */
-// const verified=localStorage.getItem("ownerVerified")==="true";
-
-// if(!verified && !isAdmin){
-// document.getElementById("codePopup").style.display="flex";
-// }else{
-// document.getElementById("ownerBar").style.display="block";
-// }
-
-
-/*  below is working code from 241 line to 274  */
-
-// const verified=localStorage.getItem("ownerVerified")==="true";
-
-// if(verified){
-// document.getElementById("ownerBar").style.display="block";
-// }
-
-// window.openOwnerLogin=()=>{
-// document.getElementById("codePopup").style.display="flex";
-// }
-
-
-
-
-
-// window.verifyCode=async()=>{
-// const entered=document.getElementById("codeInput").value.trim();
-
-// const snap=await getDocs(ownersRef);
-
-// let match=false;
-
-// snap.forEach(d=>{
-// if(d.data().ownerCode===entered){
-// match=true;
-// }
-// });
-
-// if(match){
-// localStorage.setItem("ownerVerified","true");
-// location.reload();
-// }else{
-// alert("Invalid Owner Code");
-// }
-// };
-
-
-
-
-
 /* ===== OWNER SESSION CONTROL ===== */
 
-const SESSION_LIMIT = 60 * 60 * 1000; 
-// ⏱ 1 Hour
-// Change if needed:
-// 30 min -> 30*60*1000
-// 2 hr   -> 2*60*60*1000
+const SESSION_LIMIT = 60 * 60 * 1000;
 
 function isOwnerSessionValid(){
 const verified = localStorage.getItem("ownerVerified")==="true";
@@ -298,7 +270,6 @@ const now = Date.now();
 return (now - parseInt(loginTime)) < SESSION_LIMIT;
 }
 
-// Show owner announcement if valid
 if(isOwnerSessionValid()){
 document.getElementById("ownerBar").style.display="block";
 }else{
@@ -306,16 +277,15 @@ localStorage.removeItem("ownerVerified");
 localStorage.removeItem("ownerLoginTime");
 }
 
-/* ===== OWNER LOGIN BUTTON ===== */
 window.openOwnerLogin=()=>{
 document.getElementById("codePopup").style.display="flex";
 };
 
-/* ===== VERIFY CODE ===== */
 window.verifyCode=async()=>{
 const entered=document.getElementById("codeInput").value.trim();
 
 const snap=await getDocs(ownersRef);
+
 let match=false;
 
 snap.forEach(d=>{
@@ -332,9 +302,6 @@ location.reload();
 alert("Invalid Owner Code");
 }
 };
-
-
-
 
 /* RENDER */
 const wrap=document.getElementById("cards");
@@ -374,20 +341,102 @@ teamName:document.getElementById("t"+id).value
 },{merge:true});
 };
 
+/* 🔔 NOTIFICATIONS */
+const notifListEl=document.getElementById("notifList");
+const notifCountEl=document.getElementById("notifCount");
 
+let firstLoad=true;
 
-localStorage.clear()
-// location.reload()
+function playNotificationSound(){
+const audio=new Audio("https://actions.google.com/sounds/v1/alarms/notification_simple-01.mp3");
+audio.play().catch(()=>{});
+}
+
+try{
+const q=query(collection(db,"notifications"),orderBy("time","desc"));
+
+onSnapshot(q,(snap)=>{
+let html="";
+let unreadCount=0;
+
+const lastRead=Number(localStorage.getItem("owner_notif_read")||0);
+
+let hasNew=false;
+
+snap.forEach(doc=>{
+const d=doc.data()||{};
+
+ // ✅ ONLY PLAYER REGISTRATION
+  if(d.type !== "player_registration") return;
+
+const notifTime=d.time||0;
+
+if(notifTime>lastRead){
+unreadCount++;
+hasNew=true;
+}
+
+html+=`
+<div style="border-bottom:1px solid #333;padding:10px 0;">
+<div style="font-weight:600;">${d.title||"No Title"}</div>
+<div style="font-size:13px;opacity:0.8;">${d.body||""}</div>
+</div>
+`;
+});
+
+notifListEl.innerHTML=html||"<p>No notifications</p>";
+
+if(unreadCount>0){
+notifCountEl.style.display="block";
+notifCountEl.innerText=unreadCount;
+}else{
+notifCountEl.style.display="none";
+}
+
+if(!firstLoad && hasNew){
+playNotificationSound();
+}
+
+firstLoad=false;
+});
+}catch(e){
+console.log("Notification error",e);
+}
+
+</script>
+
+<script>
+window.toggleNotifications=function(){
+const box=document.getElementById("notificationBox");
+
+const isOpen=box.style.display==="block";
+box.style.display=isOpen?"none":"block";
+
+if(!isOpen){
+localStorage.setItem("owner_notif_read",Date.now());
+document.getElementById("notifCount").style.display="none";
+}
+};
+
+document.addEventListener("click",(e)=>{
+const box=document.getElementById("notificationBox");
+const bell=document.getElementById("notificationBell");
+
+if(bell && box && !bell.contains(e.target) && !box.contains(e.target)){
+box.style.display="none";
+}
+});
 
 window.closePopup = () => {
-  document.getElementById("codePopup").style.display = "none";
+document.getElementById("codePopup").style.display = "none";
 };
 
 document.getElementById("codePopup").addEventListener("click", (e) => {
-  if (e.target.id === "codePopup") {
-    closePopup();
-  }
+if (e.target.id === "codePopup") {
+closePopup();
+}
 });
 </script>
+
 </body>
 </html>
