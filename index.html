@@ -179,6 +179,16 @@ header h1{font-size:16px}
   scroll-behavior:smooth;
 }
 
+
+/* 🔥 Highlight Latest Notification */
+.notification-item.latest{
+  border:2px solid #ffd700;
+  background:#1e3c72;
+  box-shadow:0 0 10px #ffd700;
+  border-radius:8px;
+  padding:10px;
+}
+
 </style>
 </head>
 
@@ -504,19 +514,29 @@ onSnapshot(q,(snap)=>{
 
   let hasNewNotification = false;
 
-  snap.forEach(doc=>{
+  // 🔥 FIX: force correct sorting (latest first)
+  const docs = snap.docs;
+
+  docs.sort((a,b)=>{
+    const t1 = a.data().time?.toMillis ? a.data().time.toMillis() : a.data().time || 0;
+    const t2 = b.data().time?.toMillis ? b.data().time.toMillis() : b.data().time || 0;
+    return t2 - t1;
+  });
+
+  docs.forEach((doc, index)=>{
     const d = doc.data() || {};
 
     const notifTime = d.time?.toMillis ? d.time.toMillis() : d.time || 0;
 
-    // ✅ detect new notification
     if(notifTime > lastRead){
       unreadCount++;
       hasNewNotification = true;
     }
 
+    const isLatest = index === 0; // ✅ always correct now
+
     html += `
-      <div style="border-bottom:1px solid #333;padding:10px 0;">
+      <div class="notification-item ${isLatest ? 'latest' : ''}" style="border-bottom:1px solid #333;padding:10px 0;">
         <div style="font-weight:600;">${d.title || "No Title"}</div>
         <div style="font-size:13px;opacity:0.8;">${d.body || ""}</div>
       </div>
@@ -533,7 +553,7 @@ onSnapshot(q,(snap)=>{
     notifCountEl.style.display="none";
   }
 
-  // 🔥 PLAY SOUND ONLY FOR NEW NOTIFICATION (NOT FIRST LOAD)
+  // 🔥 play sound only for new notifications
   if(!firstLoad && hasNewNotification){
     playNotificationSound();
   }
@@ -574,8 +594,12 @@ window.toggleNotifications = function(){
     const items = document.querySelectorAll("#notifList div");
 
     if(items.length > 0){
-      const latestTime = Date.now(); // fallback
-      localStorage.setItem("jp_notifications_read", latestTime);
+      const firstDoc = document.querySelector("#notifList .notification-item");
+
+if(firstDoc){
+  const latestTime = Date.now(); // still ok fallback
+  localStorage.setItem("jp_notifications_read", latestTime);
+}
     }
 
     if(notifCountEl){
