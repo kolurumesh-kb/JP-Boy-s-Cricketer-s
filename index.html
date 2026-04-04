@@ -475,31 +475,40 @@ checkVersion();
 
 /* ================= NOTIFICATION REALTIME ================= */
 
+/* ================= NOTIFICATION REALTIME ================= */
+
 const notifListEl = document.getElementById("notifList");
 const notifCountEl = document.getElementById("notifCount");
+
+let firstLoad = true; // ✅ prevent sound on initial load
+
+function playNotificationSound(){
+  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/notification_simple-01.mp3");
+  audio.play().catch(()=>{});
+}
 
 try{
 
 const q = query(collection(db,"notifications"), orderBy("time","desc"));
-
-
 
 onSnapshot(q,(snap)=>{
 
   let html = "";
   let unreadCount = 0;
 
-  // ✅ ALWAYS get latest value
   const lastRead = Number(localStorage.getItem("jp_notifications_read") || 0);
+
+  let hasNewNotification = false;
 
   snap.forEach(doc=>{
     const d = doc.data() || {};
 
     const notifTime = d.time?.toMillis ? d.time.toMillis() : d.time || 0;
 
-    // ✅ compare with latest value
+    // ✅ detect new notification
     if(notifTime > lastRead){
       unreadCount++;
+      hasNewNotification = true;
     }
 
     html += `
@@ -512,6 +521,7 @@ onSnapshot(q,(snap)=>{
 
   notifListEl.innerHTML = html || "<p style='text-align:center;'>No notifications 📭</p>";
 
+  // ✅ badge count
   if(unreadCount > 0){
     notifCountEl.style.display="block";
     notifCountEl.innerText = unreadCount;
@@ -519,7 +529,12 @@ onSnapshot(q,(snap)=>{
     notifCountEl.style.display="none";
   }
 
+  // 🔥 PLAY SOUND ONLY FOR NEW NOTIFICATION (NOT FIRST LOAD)
+  if(!firstLoad && hasNewNotification){
+    playNotificationSound();
+  }
 
+  firstLoad = false;
 
 });
 
