@@ -27,6 +27,8 @@ background:#ffeb3b;color:#000;padding:7px 14px;
 border-radius:20px;text-decoration:none;font-weight:600;font-size:14px;
 }
 
+
+
 .hamburger{display:none;font-size:26px;cursor:pointer;}
 
 .mobile-menu{
@@ -127,6 +129,56 @@ header h1{font-size:16px}
 .caption h2{font-size:16px}
 .caption p{font-size:13px}
 }
+
+
+
+#notificationBell{
+  position:relative;
+  font-size:22px;
+  cursor:pointer;
+  margin-left:10px;
+}
+
+#notifCount{
+  position:absolute;
+  top:-6px;
+  right:-10px;
+  background:red;
+  color:#fff;
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:50%;
+  display:none;
+}
+
+#notificationBox{
+  position:absolute;
+  top:60px;
+  right:10px;
+  width:320px;
+  max-height:400px;
+  overflow-y:auto;
+  background:#111;
+  color:#fff;
+  border-radius:12px;
+  display:none;
+  z-index:2000;
+  box-shadow:0 0 12px rgba(0,0,0,0.6);
+  padding:12px;
+}
+
+@media(max-width:768px){
+  #notificationBox{
+    width:95%;
+    right:2.5%;
+    top:70px;
+  }
+}
+
+#notificationBox{
+  scroll-behavior:smooth;
+}
+
 </style>
 </head>
 
@@ -135,6 +187,7 @@ header h1{font-size:16px}
 <header>
 <h1>🏏 JP Boy's Cricketer's</h1>
 
+<div style="display:flex;align-items:center;gap:10px;">
 <div class="nav-links">
 <a href="register.html">Register</a>
 <a href="owner.html">Owner's</a>
@@ -145,6 +198,15 @@ header h1{font-size:16px}
 <a href="auction-live.html">Live Auction</a>
 <a href="rules.html">Tournament Rules</a>
 <a href="monhtly kit payments.html">Monthly Kit Amount</a>
+</div>
+
+<!-- /* Notification Bell Icon */ -->
+
+<div id="notificationBell" onclick="toggleNotifications()">
+  🔔
+  <span id="notifCount">0</span>
+</div>
+
 </div>
 
 <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -161,6 +223,11 @@ header h1{font-size:16px}
 <a href="monhtly kit payments.html">Monthly Kit Amount</a>
 </div>
 </header>
+
+<div id="notificationBox">
+  <h3 style="margin-bottom:10px;">📢 Notifications</h3>
+  <div id="notifList">Loading...</div>
+</div>
 
 <div class="announcement" id="announcement">
 <div class="marquee">
@@ -341,12 +408,21 @@ document.getElementById("seasonAnnouncement").style.display="none";
 <!-- ONLY showing changed parts clearly, rest remains same -->
 
 <!-- ================= VERSION + UPDATE FIX ================= -->
+<!-- ONLY showing IMPORTANT FIXED PARTS clearly -->
+<!-- YOUR FULL CODE REMAINS SAME, ONLY BELOW CHANGES APPLIED -->
+
+<!-- ❌ REMOVE THIS LINE -->
+<!-- <script src="capacitor.js"></script> -->
+
+
+<!-- ================= FIREBASE SCRIPT FIX ================= -->
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import {
 getFirestore, doc, getDoc, setDoc,
-updateDoc, onSnapshot, increment
+updateDoc, onSnapshot, increment,
+collection, orderBy, query
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -357,78 +433,148 @@ projectId:"jp-boys"
 
 const db = getFirestore(app);
 
-/* ================= VISIT COUNTER (UNCHANGED) ================= */
+/* ================= VISIT COUNTER ================= */
 
 const visitRef = doc(db,"siteStats","visits");
-const VISIT_FLAG="jp_counted_visit";
-
-async function registerVisit(){
-if(localStorage.getItem(VISIT_FLAG)) return;
-
-const snap = await getDoc(visitRef);
-if(snap.exists()){
-await updateDoc(visitRef,{count:increment(1)});
-}else{
-await setDoc(visitRef,{count:1});
-}
-
-localStorage.setItem(VISIT_FLAG,"true");
-}
 
 onSnapshot(visitRef,(d)=>{
 if(d.exists()){
 const el=document.getElementById("liveVisits");
-if(el) el.innerText=d.data().count;
+if(el) el.innerText=d.data().count || 0;
 }
 });
 
-registerVisit();
-
-/* ================= VERSION + UPDATE ================= */
+/* ================= VERSION SAFE ================= */
 
 const CURRENT_VERSION = "2.1";
 
 async function checkVersion(){
 
-  document.getElementById("appVersion").innerText = CURRENT_VERSION;
+  const el = document.getElementById("appVersion");
+  if(el) el.innerText = CURRENT_VERSION;
 
-  const snap = await getDoc(doc(db,"settings","app"));
-  if(!snap.exists()) {
-    console.log("❌ No version doc found");
-    return;
-  }
+  try{
+    const snap = await getDoc(doc(db,"settings","app"));
 
-  const latestVersion = String(snap.data().version).trim();
-  const currentVersion = String(CURRENT_VERSION).trim();
+    if(!snap.exists()){
+      console.log("⚠ No version doc");
+      return;
+    }
 
-  console.log("🔥 App Version:", currentVersion);
-  console.log("🔥 Firestore Version:", latestVersion);
+    const latestVersion = String(snap.data().version || "").trim();
 
-  if(latestVersion !== currentVersion){
+    if(latestVersion && latestVersion !== CURRENT_VERSION){
+      alert("🚨 New Update Available!");
+    }
 
-    alert("🚨 New Update Available!");
-
-    document.body.innerHTML = `
-      <div style="
-        height:100vh;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:linear-gradient(135deg,#000,#1a237e);
-        color:#fff;
-        text-align:center;
-        padding:20px;
-      ">
-        <div>
-          <h2>⚠ Update Required</h2>
-          <p>New version ${latestVersion} available</p>
-        </div>
-      </div>
-    `;
+  }catch(e){
+    console.log("❌ Version check error", e);
   }
 }
 checkVersion();
 
+/* ================= NOTIFICATION REALTIME ================= */
+
+const notifListEl = document.getElementById("notifList");
+const notifCountEl = document.getElementById("notifCount");
+
+try{
+
+const q = query(collection(db,"notifications"), orderBy("time","desc"));
+
+
+
+onSnapshot(q,(snap)=>{
+
+  let html = "";
+  let unreadCount = 0;
+
+  // ✅ ALWAYS get latest value
+  const lastRead = Number(localStorage.getItem("jp_notifications_read") || 0);
+
+  snap.forEach(doc=>{
+    const d = doc.data() || {};
+
+    const notifTime = d.time?.toMillis ? d.time.toMillis() : d.time || 0;
+
+    // ✅ compare with latest value
+    if(notifTime > lastRead){
+      unreadCount++;
+    }
+
+    html += `
+      <div style="border-bottom:1px solid #333;padding:10px 0;">
+        <div style="font-weight:600;">${d.title || "No Title"}</div>
+        <div style="font-size:13px;opacity:0.8;">${d.body || ""}</div>
+      </div>
+    `;
+  });
+
+  notifListEl.innerHTML = html || "<p style='text-align:center;'>No notifications 📭</p>";
+
+  if(unreadCount > 0){
+    notifCountEl.style.display="block";
+    notifCountEl.innerText = unreadCount;
+  }else{
+    notifCountEl.style.display="none";
+  }
+
+
+
+});
+
+}catch(e){
+  console.log("❌ Notification error", e);
+}
+
+/* ================= GLOBAL FUNCTION FIX ================= */
+
+// window.toggleNotifications = function(){
+//   const box = document.getElementById("notificationBox");
+
+//   if(!box) return;
+
+//   box.style.display = box.style.display === "block" ? "none" : "block";
+
+//   if(box.style.display === "block" && notifCountEl){
+//     notifCountEl.style.display = "none";
+//   }
+// };
+
+window.toggleNotifications = function(){
+
+  const box = document.getElementById("notificationBox");
+  if(!box) return;
+
+  const isOpen = box.style.display === "block";
+  box.style.display = isOpen ? "none" : "block";
+
+  if(!isOpen){
+
+    // ✅ get latest notification time
+    const items = document.querySelectorAll("#notifList div");
+
+    if(items.length > 0){
+      const latestTime = Date.now(); // fallback
+      localStorage.setItem("jp_notifications_read", latestTime);
+    }
+
+    if(notifCountEl){
+      notifCountEl.style.display = "none";
+    }
+  }
+};
+
+/* ================= OUTSIDE CLICK SAFE ================= */
+
+document.addEventListener("click",(e)=>{
+  const box = document.getElementById("notificationBox");
+  const bell = document.getElementById("notificationBell");
+
+  if(bell && box && !bell.contains(e.target) && !box.contains(e.target)){
+    box.style.display="none";
+  }
+});
 </script>
 
 <!-- ================= REMOVE OLD BUG LINE ================= -->
@@ -476,7 +622,7 @@ document.getElementById("appVersion").innerText = APP_VERSION;
 
 </script> -->
 
-<script src="capacitor.js"></script>
+<!-- <script src="capacitor.js"></script> -->
 
 <script>
 // window.addEventListener("load", async () => {
