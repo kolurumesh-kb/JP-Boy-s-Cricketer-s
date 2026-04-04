@@ -11,8 +11,9 @@ body{
   font-family:Segoe UI;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:flex-start; /* ✅ changed */
   height:100vh;
+  overflow:hidden; /* prevent full page scroll */
 }
 
 .box{
@@ -20,6 +21,17 @@ body{
   padding:20px;
   border-radius:14px;
   width:340px;
+
+  max-height:90vh;   /* ✅ LIMIT HEIGHT */
+  overflow-y:auto;   /* ✅ SCROLL INSIDE */
+}
+
+.box::-webkit-scrollbar{
+  width:6px;
+}
+.box::-webkit-scrollbar-thumb{
+  background:#3498db;
+  border-radius:10px;
 }
 
 h3{text-align:center}
@@ -67,6 +79,38 @@ input[type="email"]{background:orange}
   font-size:13px;
   opacity:0.9;
 }
+
+
+
+/* 🔥 SIDE BY SIDE LAYOUT */
+.topRow{
+  display:flex;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+/* both cards equal width */
+.topRow .notify{
+  flex:1;
+  max-height:200px;   /* prevent overflow */
+  overflow-y:auto;
+}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:600px){
+  .topRow{
+    flex-direction:column;
+  }
+}
+
+.notify::-webkit-scrollbar{
+  width:5px;
+}
+.notify::-webkit-scrollbar-thumb{
+  background:#3498db;
+  border-radius:10px;
+}
+
 </style>
 </head>
 
@@ -85,10 +129,22 @@ input[type="email"]{background:orange}
 
 
   <!-- ⭐ ADVANCED NOTIFICATION PANEL -->
+ <!-- ADD THIS NEW ROW -->
+<div class="topRow">
+
+  <!-- LEFT: REGISTRATION STATUS -->
   <div class="notify">
     <b>📊 Registration Status</b>
     <div id="notifyContent">Loading...</div>
   </div>
+
+  <!-- RIGHT: NOTIFICATIONS -->
+  <div class="notify">
+    <b>📢 Sent Notifications</b>
+    <div id="notificationList" class="small">Loading...</div>
+  </div>
+
+</div>
 
   <h3>Auction Control</h3>
 
@@ -107,7 +163,45 @@ input[type="email"]{background:orange}
 <button class="red" onclick="resetAllPlayers()">RESET ALL PLAYERS</button>
 <button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
 <button onclick="resetMonthlyKit()">Reset Monthly Kit Payments</button>
+<button class="blue" onclick="openNotifyBox()">📢 Send Notification</button>
 
+
+
+
+
+
+
+
+
+
+<!-- 🔔 NOTIFICATION POPUP -->
+<div id="notifyPopup" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+  <div style="
+    background:#102840;
+    padding:20px;
+    border-radius:12px;
+    width:320px;
+  ">
+    <h3>Send Notification</h3>
+
+    <input type="text" id="notifTitle" placeholder="Title" style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:none;">
+
+    <textarea id="notifBody" placeholder="Message" style="width:100%;padding:10px;border-radius:8px;border:none;height:80px;"></textarea>
+
+    <br><br>
+
+    <button class="green" onclick="sendNotification()">Send</button>
+    <button class="red" onclick="closeNotifyBox()">Cancel</button>
+  </div>
 </div>
 
 <script>
@@ -407,6 +501,144 @@ window.resetMonthlyKit = async function(){
     alert("Error while resetting ❌");
   }
 };
+
+
+
+
+/* ================= SEND NOTIFICATION ================= */
+
+window.openNotifyBox = function(){
+  document.getElementById("notifyPopup").style.display = "flex";
+};
+
+window.closeNotifyBox = function(){
+  document.getElementById("notifyPopup").style.display = "none";
+};
+
+window.sendNotification = async function(){
+
+  const title = document.getElementById("notifTitle").value.trim();
+  const body = document.getElementById("notifBody").value.trim();
+
+  if(!title || !body){
+    alert("Enter title and message");
+    return;
+  }
+
+  try{
+
+    // ✅ SAVE TO FIRESTORE (for bell notification)
+    await setDoc(doc(collection(db,"notifications")), {
+      title: title,
+      body: body,
+      time: Date.now()
+    });
+
+    alert("✅ Notification Sent");
+
+    closeNotifyBox();
+
+    document.getElementById("notifTitle").value="";
+    document.getElementById("notifBody").value="";
+
+  }catch(e){
+    console.error(e);
+    alert("❌ Failed to send");
+  }
+};
+
+
+/* ================= LOAD & DELETE NOTIFICATIONS ================= */
+
+import { query, orderBy } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+const notifContainer = document.getElementById("notificationList");
+
+onSnapshot(
+  query(collection(db, "notifications"), orderBy("time", "desc")),
+  (snap) => {
+
+    if(snap.empty){
+      notifContainer.innerHTML = "No notifications";
+      return;
+    }
+
+    let html = "";
+    let count = 0;
+
+    snap.forEach(docSnap => {
+
+      if(count >= 5) return; // ✅ LIMIT TO 5 ONLY
+
+      const data = docSnap.data();
+
+      // 🔥 SHORT MESSAGE (SAFE)
+      const shortMsg = data.body.length > 35
+        ? data.body.substring(0, 35) + "..."
+        : data.body;
+
+      html += `
+        <div style="
+          background:#0f2f4a;
+          padding:8px;
+          border-radius:8px;
+          margin-bottom:8px;
+        ">
+          <b>${data.title}</b><br>
+
+          <span style="
+            color:#ccc;
+            cursor:pointer;
+            display:block;
+            margin-top:2px;
+          "
+          onclick="showFullMsg(\`${data.body.replace(/`/g, "\\`")}\`)">
+            ${shortMsg}
+          </span>
+
+          <button 
+            style="
+              margin-top:6px;
+              background:red;
+              color:#fff;
+              border:none;
+              padding:4px 8px;
+              border-radius:6px;
+              cursor:pointer;
+              font-size:12px;
+            "
+            onclick="deleteNotification('${docSnap.id}')"
+          >
+            ❌ Delete
+          </button>
+        </div>
+      `;
+
+      count++;
+    });
+
+    notifContainer.innerHTML = html;
+  }
+);
+
+/* DELETE FUNCTION */
+window.deleteNotification = async function(id){
+
+  if(!confirm("Delete this notification?")) return;
+
+  try{
+    await deleteDoc(doc(db, "notifications", id));
+    alert("Deleted ✅");
+  }catch(e){
+    console.error(e);
+    alert("Delete failed ❌");
+  }
+};
+
+window.showFullMsg = function(msg){
+  alert(msg);
+};
+
 
 
 
