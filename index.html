@@ -718,7 +718,12 @@ onSnapshot(
 
     if(snap.empty) return;
 
-    const docData = snap.docs[0].data();
+      // ✅ FILTER ONLY ADMIN NOTIFICATIONS
+    const adminNotifs = snap.docs.filter(d => d.data().type === "admin");
+
+    if(adminNotifs.length === 0) return;
+
+     const docData = adminNotifs[0].data();
     
     
     // ✅ ALWAYS SHOW ON VISIT (no condition)
