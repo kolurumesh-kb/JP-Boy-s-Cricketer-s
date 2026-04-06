@@ -708,55 +708,68 @@ document.addEventListener("click",(e)=>{
 
 /* ================= ADMIN POPUP NOTIFICATION ================= */
 
+// const popup = document.getElementById("adminPopup");
+// const popupTitle = document.getElementById("popupTitle");
+// const popupBody = document.getElementById("popupBody");
+
+
+
+import { where } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
 const popup = document.getElementById("adminPopup");
 const popupTitle = document.getElementById("popupTitle");
 const popupBody = document.getElementById("popupBody");
 
+// let popupShown = false;
+
+ let lastPopupTime = 0;
+
 onSnapshot(
-  query(collection(db,"notifications"), orderBy("time","desc"), limit(1)),
+  query(
+    collection(db,"notifications"),
+    where("type","==","admin"),   // ✅ FILTER
+    orderBy("time","desc"),
+    limit(1)
+  ),
   (snap)=>{
 
     if(snap.empty) return;
 
-      // ✅ FILTER ONLY ADMIN NOTIFICATIONS
-    const adminNotifs = snap.docs.filter(d => d.data().type === "admin");
+    const docData = snap.docs[0].data();
 
-    if(adminNotifs.length === 0) return;
 
-     const docData = adminNotifs[0].data();
-    
-    
-    // ✅ ALWAYS SHOW ON VISIT (no condition)
+
+    const currentTime = docData.time?.toMillis
+      ? docData.time.toMillis()
+      : docData.time || 0;
+
+    // ✅ prevent repeat popup
+    if(currentTime <= lastPopupTime) return;
+
+    lastPopupTime = currentTime;
+
+    console.log("ADMIN SNAP:", snap.docs.length);
+
+    // // ✅ ONLY ADMIN
+    // if(docData.type !== "admin") return;
+
+    // const currentTime = docData.time || 0;
+
+    // // ✅ prevent repeat popup
+    // if(currentTime <= lastPopupTime) return;
+
+    // lastPopupTime = currentTime;
+
     popupTitle.innerText = docData.title || "Notification";
     popupBody.innerText = docData.body || "";
 
-
-      // ✅ IMPORTANT: SHOW POPUP (YOU MISSED THIS)
     popup.style.display = "flex";
 
-
-    // ✅ SHOW ONLY NEW NOTIFICATION
-    // if(notifTime > lastSeenPopup){
-
-    //   popupTitle.innerText = docData.title || "Notification";
-    //   popupBody.innerText = docData.body || "";
-
-    //   popup.style.display = "flex";
-
-     
-    // }
-
-
-
-  // ✅ AUTO CLOSE AFTER 5 SECONDS
-  setTimeout(() => {
-    if(popup.style.display === "flex"){
+    setTimeout(() => {
       popup.style.display = "none";
-    }
-  }, 10000);
-}
+    }, 10000);
 
-  
+  }
 );
 
 window.closePopup = function(){
