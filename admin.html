@@ -148,6 +148,19 @@ input[type="email"]{background:orange}
 
   <h3>Auction Control</h3>
 
+<!-- 🗑 MANAGE PLAYERS CARD -->
+<div class="notify" style="margin-bottom:14px;">
+  <b>🗑 Manage Players</b>
+  
+  <div id="adminPlayerList" style="
+    margin-top:10px;
+    max-height:250px;
+    overflow-y:auto;
+  ">
+    Loading...
+  </div>
+</div>
+
 <label>Auction ON <input type="checkbox" id="auctionToggle"></label>
 <label>Bidding Enabled <input type="checkbox" id="bidToggle"></label>
 <label>Enable Player Reset <input type="checkbox" id="resetToggle"></label>
@@ -164,6 +177,7 @@ input[type="email"]{background:orange}
 <button class="blue" onclick="resetAuctionSeason()">RESET AUCTION SEASON</button>
 <button onclick="resetMonthlyKit()">Reset Monthly Kit Payments</button>
 <button class="blue" onclick="openNotifyBox()">📢 Send Notification</button>
+
 
 
 
@@ -640,6 +654,80 @@ window.showFullMsg = function(msg){
 };
 
 
+
+
+/* ================= PLAYER DELETE (ADMIN ONLY) ================= */
+
+const adminList = document.getElementById("adminPlayerList");
+
+// 🔥 REALTIME PLAYER LIST
+onSnapshot(collection(db,"players"), (snap)=>{
+
+  if(!adminList) return;
+
+  if(snap.empty){
+    adminList.innerHTML = "No players found";
+    return;
+  }
+
+  let html = "";
+
+  snap.forEach(docSnap => {
+
+    const p = docSnap.data();
+
+    html += `
+      <div style="
+        background:#0f2f4a;
+        padding:10px;
+        border-radius:10px;
+        margin-bottom:10px;
+      ">
+        <b>${p.name || "No Name"}</b><br>
+        📞 ${p.mobile || "-"}<br>
+        Role: ${p.role || "-"}<br>
+
+        <button 
+          style="
+            margin-top:6px;
+            background:red;
+            color:#fff;
+            border:none;
+            padding:6px 10px;
+            border-radius:6px;
+            cursor:pointer;
+          "
+          onclick="deletePlayer('${docSnap.id}')"
+        >
+          ❌ Delete Player
+        </button>
+      </div>
+    `;
+  });
+
+  adminList.innerHTML = html;
+});
+
+
+// 🔥 DELETE FUNCTION
+window.deletePlayer = async function(id){
+
+  // ✅ SECURITY CHECK
+  if(localStorage.getItem("isAdmin") !== "true"){
+    alert("Not authorized ❌");
+    return;
+  }
+
+  if(!confirm("Are you sure to delete this player?")) return;
+
+  try{
+    await deleteDoc(doc(db,"players", id));
+    alert("Player deleted ✅");
+  }catch(e){
+    console.error(e);
+    alert("Delete failed ❌");
+  }
+};
 
 
 </script>
