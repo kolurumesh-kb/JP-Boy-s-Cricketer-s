@@ -545,7 +545,8 @@ window.sendNotification = async function(){
     await setDoc(doc(collection(db,"notifications")), {
       title: title,
       body: body,
-      time: Date.now()
+      time: Date.now(),
+      type: "admin"   // ✅ ADD THIS LINE
     });
 
     alert("✅ Notification Sent");
