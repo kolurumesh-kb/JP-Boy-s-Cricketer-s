@@ -189,6 +189,23 @@ header h1{font-size:16px}
   padding:10px;
 }
 
+
+
+
+@keyframes popupBounce {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 </style>
 </head>
 
@@ -237,6 +254,61 @@ header h1{font-size:16px}
 <div id="notificationBox">
   <h3 style="margin-bottom:10px;">📢 Notifications</h3>
   <div id="notifList">Loading...</div>
+</div>
+
+
+
+
+<!-- 🔥 ADMIN POPUP NOTIFICATION -->
+<div id="adminPopup" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.75);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+ <div style="
+  background:rgba(255,255,255,0.95);
+  padding:22px;
+  border-radius:16px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 8px 25px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(0,0,0,0.1);
+   animation: popupBounce 0.4s ease;
+">
+    <h3 id="popupTitle" style="
+  color:#0d47a1;
+  font-size:20px;
+  margin-bottom:10px;
+  font-weight:700;
+">📢 Notification</h3>
+
+   <p id="popupBody" style="
+  margin:10px 0;
+  color:#333;
+  font-size:14px;
+  line-height:1.6;
+"></p>
+
+   <button onclick="closePopup()" style="
+  background:linear-gradient(90deg,#ff9800,#ff5722);
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  margin-top:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+">
+Close
+</button>
+  </div>
 </div>
 
 <div class="announcement" id="announcement">
@@ -632,6 +704,62 @@ document.addEventListener("click",(e)=>{
     box.style.display="none";
   }
 });
+
+
+/* ================= ADMIN POPUP NOTIFICATION ================= */
+
+const popup = document.getElementById("adminPopup");
+const popupTitle = document.getElementById("popupTitle");
+const popupBody = document.getElementById("popupBody");
+
+onSnapshot(
+  query(collection(db,"notifications"), orderBy("time","desc"), limit(1)),
+  (snap)=>{
+
+    if(snap.empty) return;
+
+    const docData = snap.docs[0].data();
+    
+    
+    // ✅ ALWAYS SHOW ON VISIT (no condition)
+    popupTitle.innerText = docData.title || "Notification";
+    popupBody.innerText = docData.body || "";
+
+
+      // ✅ IMPORTANT: SHOW POPUP (YOU MISSED THIS)
+    popup.style.display = "flex";
+
+
+    // ✅ SHOW ONLY NEW NOTIFICATION
+    // if(notifTime > lastSeenPopup){
+
+    //   popupTitle.innerText = docData.title || "Notification";
+    //   popupBody.innerText = docData.body || "";
+
+    //   popup.style.display = "flex";
+
+     
+    // }
+
+
+
+  // ✅ AUTO CLOSE AFTER 5 SECONDS
+  setTimeout(() => {
+    if(popup.style.display === "flex"){
+      popup.style.display = "none";
+    }
+  }, 10000);
+}
+
+  
+);
+
+window.closePopup = function(){
+  const popup = document.getElementById("adminPopup");
+  if(popup) popup.style.display = "none";
+};
+
+
 </script>
 
 <!-- ================= REMOVE OLD BUG LINE ================= -->
