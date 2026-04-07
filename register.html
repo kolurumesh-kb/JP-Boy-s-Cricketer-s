@@ -341,6 +341,51 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
   <p>Upload receipt after payment</p>
 </div>
 
+
+<!-- <div style="text-align:center;margin-top:10px">
+
+  <button type="button" onclick="payUPI()" style="
+    background:#5f259f;
+    color:#fff;
+    margin-bottom:8px;
+  ">
+    📲 Pay with PhonePe / GPay
+  </button>
+
+  <p style="font-size:13px;color:#9ad1ff;margin-top:6px">
+    (Opens UPI apps automatically)
+  </p>
+
+</div> -->
+<div style="text-align:center;margin-top:12px">
+
+  <!-- PhonePe -->
+  <button type="button" onclick="payPhonePe()" style="
+    background:#5f259f;
+    color:#fff;
+    margin-bottom:10px;
+  ">
+    📲 Pay with PhonePe
+  </button>
+
+  <!-- Google Pay -->
+  <button type="button" onclick="payGPay()" style="
+    background:#0f9d58;
+    color:#fff;
+  ">
+    📲 Pay with Google Pay
+  </button>
+
+  <p style="font-size:13px;color:#9ad1ff;margin-top:8px">
+    (Opens selected UPI app)
+  </p>
+
+</div>
+
+
+
+
+
 <label>Receipt</label>
 <input id="receipt" type="file" accept="image/*" required>
 <div id="receiptSize" class="size-text"></div>
@@ -783,6 +828,63 @@ window.addEventListener("load", async () => {
 
 });
 
+</script>
+
+
+
+
+
+
+<!-- <script>
+function payUPI(){
+
+  const upiId = "8197901199@ybl";
+  const name = "JP Boys Cricket";
+  const amount = "800";
+  const note = "Registration Fee";
+
+  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  // 🔥 Open UPI app
+  window.location.href = upiLink;
+
+  // ⚠️ fallback if not opened
+  setTimeout(()=>{
+    alert("If payment app not opened, please use QR code.");
+  },2000);
+}
+</script> -->
+
+
+<script>
+const upiId = "8197901199@ybl";
+const name = "JP Boys Cricket";
+const amount = "800";
+const note = "Registration Fee";
+
+// 🔥 PhonePe
+function payPhonePe(){
+
+  const link = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  window.location.href = link;
+
+  setTimeout(()=>{
+    alert("If PhonePe not opened, please use QR code.");
+  },2000);
+}
+
+// 🔥 Google Pay
+function payGPay(){
+
+  const link = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  window.location.href = link;
+
+  setTimeout(()=>{
+    alert("If Google Pay not opened, please use QR code.");
+  },2000);
+}
 </script>
 
 
