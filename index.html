@@ -515,9 +515,35 @@ projectId:"jp-boys"
 
 const db = getFirestore(app);
 
+const visitRef = doc(db,"siteStats","visits");
+
+increaseVisitCount();
+
 /* ================= VISIT COUNTER ================= */
 
-const visitRef = doc(db,"siteStats","visits");
+async function increaseVisitCount(){
+
+  try{
+
+    const snap = await getDoc(visitRef);
+
+    if(!snap.exists()){
+      // First time create doc
+      await setDoc(visitRef, { count: 1 });
+    }else{
+      // Increment safely
+      await updateDoc(visitRef, {
+        count: increment(1)
+      });
+    }
+
+  }catch(e){
+    console.log("❌ Visit count error", e);
+  }
+
+}
+
+
 
 onSnapshot(visitRef,(d)=>{
 if(d.exists()){
