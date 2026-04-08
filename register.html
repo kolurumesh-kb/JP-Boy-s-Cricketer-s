@@ -380,8 +380,13 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
     📲 Pay with Google Pay
   </button>
 
-  <p style="font-size:13px;color:#9ad1ff;margin-top:8px">
+  <!-- <p style="font-size:13px;color:#9ad1ff;margin-top:8px">
     (Opens selected UPI app)
+  </p> -->
+
+    <!-- ✅ Helpful message instead of popup -->
+  <p style="font-size:13px;color:#9ad1ff;margin-top:10px">
+    If payment app didn’t open, please use UPI ID or QR code above.
   </p>
 
 </div>
@@ -860,7 +865,7 @@ function payUPI(){
 </script> -->
 
 
-<script>
+<!-- <script>
 const upiId = "8197901199@ybl";
 const name = "JP Boys Cricket";
 const amount = "800";
@@ -889,6 +894,58 @@ function payGPay(){
     alert("If Google Pay not opened, please use QR code.");
   },20000);
 }
+</script> -->
+
+
+<script>
+const upiId = "8197901199@ybl";
+const name = "JP Boys Cricket";
+const amount = "800";
+const note = "Registration Fee";
+
+// 🔥 Common UPI link
+function getUPILink(){
+  return `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+}
+
+// 🔥 PhonePe
+function payPhonePe(){
+  openUPI();
+}
+
+// 🔥 Google Pay
+function payGPay(){
+  openUPI();
+}
+
+// 🔥 Open UPI app
+function openUPI(){
+  window.location.href = getUPILink();
+
+  // mark that user went to payment app
+  localStorage.setItem("upi_redirect", "true");
+}
+
+// ✅ Smart return detection (ONLY when user comes back)
+document.addEventListener("visibilitychange", () => {
+
+  if(document.visibilityState === "visible"){
+
+    const redirected = localStorage.getItem("upi_redirect");
+
+    if(redirected === "true"){
+
+      // clear flag
+      localStorage.removeItem("upi_redirect");
+
+      // show message AFTER returning (not during payment)
+      setTimeout(()=>{
+        alert("If you have completed the payment, please upload receipt. If not, use UPI ID or QR code.");
+      }, 5000);
+    }
+  }
+
+});
 </script>
 
 
