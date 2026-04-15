@@ -194,8 +194,16 @@ footer{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+// import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+import { 
+  getFirestore, 
+  collection, 
+  onSnapshot,
+  getDocs,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 /*Reducing the image size */
 
@@ -252,6 +260,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+
 const latestDiv = document.getElementById("latestSold");
 const historyDiv = document.getElementById("soldHistory");
 const teamsDiv = document.getElementById("teams");
@@ -259,6 +270,7 @@ const sound = document.getElementById("soldSound");
 
 let shown = new Set();
 let soldPlayers = [];
+const PLAYER_LIMIT = 11;
 
 const TEAMS = [
   {name:"MegaStar Cricketer's",logo:"https://res.cloudinary.com/dwvem4ixh/image/upload/v1770146487/megastar_krtll5.jpg"},
@@ -331,11 +343,36 @@ function renderTeams(){
         <div class="team-top">
           <img loading="lazy" src="${optimizeImage(t.logo)}">
 
-          <b>${t.name}</b>
+       <b style="color:${list.length >= PLAYER_LIMIT ? '#ff4d4d' : '#fff'}">
+  ${t.name} (${list.length}/${PLAYER_LIMIT})
+</b>
         </div>
         ${
           list.length
-          ? `<ul>${list.map(p=>`<li>${p.name} - ₹${p.soldAmount}</li>`).join("")}</ul>
+          ? `<ul>
+  ${list.map(p=>`
+    <li>
+      ${p.name} - ₹${p.soldAmount}
+
+      ${
+        isAdmin
+        ? `
+          <select 
+            style="margin-left:8px;padding:4px;border-radius:6px;"
+            onchange="movePlayer('${p.id}', this.value)"
+          >
+            <option value="">Move</option>
+            ${TEAMS.map(t => `
+              <option value="${t.name}">${t.name}</option>
+            `).join("")}
+          </select>
+        `
+        : ""
+      }
+
+    </li>
+  `).join("")}
+</ul>
              <button onclick="downloadPDF('${t.name.replace(/'/g,"")}')">Download PDF</button>`
           : `<p>No players yet</p>`
         }
@@ -480,7 +517,26 @@ window.downloadPDF = async (team) => {
     }
   }
 
-  pdf.save(team + ".pdf");
+  // pdf.save(team + ".pdf");
+
+  const blob = pdf.output("blob");
+const url = URL.createObjectURL(blob);
+
+// 🔍 Detect mobile WebView
+const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+if (isMobile) {
+  // 📱 Mobile → open PDF (user can download/share)
+  window.open(url, "_blank");
+} else {
+  // 💻 Desktop → direct download
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = team + ".pdf";
+  a.click();
+}
+
+setTimeout(() => URL.revokeObjectURL(url), 3000);
 };
 
 
@@ -540,7 +596,46 @@ window.downloadPDF = async (team) => {
 
 
 
+window.movePlayer = async function(playerId, newTeam){
 
+  if(!newTeam) return;
+
+  if(localStorage.getItem("isAdmin") !== "true"){
+    alert("Not authorized ❌");
+    return;
+  }
+
+  try{
+
+    const PLAYER_LIMIT = 11;
+
+    const snap = await getDocs(collection(db,"players"));
+
+    let count = 0;
+
+    snap.forEach(d=>{
+      const data = d.data();
+      if(data.sold && data.soldTeam === newTeam){
+        count++;
+      }
+    });
+
+    if(count >= PLAYER_LIMIT){
+      alert("❌ Team already full");
+      return;
+    }
+
+    await updateDoc(doc(db,"players", playerId),{
+      soldTeam:newTeam
+    });
+
+    alert("✅ Player moved successfully");
+
+  }catch(e){
+    console.error(e);
+    alert("❌ Move failed");
+  }
+};
 
 
 </script>
