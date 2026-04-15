@@ -162,6 +162,26 @@ z-index:2000;
 box-shadow:0 0 12px rgba(0,0,0,0.6);
 padding:12px;
 }
+
+
+.viewBtn{
+margin-top:10px;
+background:linear-gradient(90deg,#ff512f,#dd2476);
+color:#fff;
+border:none;
+padding:10px;
+border-radius:10px;
+width:100%;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+.viewBtn:hover{
+transform:scale(1.05);
+box-shadow:0 4px 12px rgba(0,0,0,0.3);
+}
+
 </style>
 </head>
 
@@ -198,7 +218,7 @@ padding:12px;
 <!-- OWNER ANNOUNCEMENT -->
 <div class="announcement ownerBar" id="ownerBar">
 <span>
-🔒 Owner Notice: Bidding Annoucement will be informed soon and this time bidding will be done in the closed rooms with minimum members only • Keep budget ready. Don't Share this Information to Anyone.
+🔒 Owner Notice: Now it's time to Announce the Schudle . I wish each owner's will go through the schudle and informing to their teams. All the Best to Owner's
 </span>
 </div>
 
@@ -243,8 +263,79 @@ authDomain:"jp-boys.firebaseapp.com",
 projectId:"jp-boys"
 });
 
+
+
 const db=getFirestore(app);
+
+
 const ownersRef=collection(db,"owners");
+
+const playersRef = collection(db,"players");
+
+let soldPlayers = [];
+
+onSnapshot(playersRef, snap=>{
+  soldPlayers = snap.docs
+    .map(d=>d.data())
+    .filter(p=>p.sold);
+});
+
+document.addEventListener("click",(e)=>{
+  if(e.target.classList.contains("viewBtn")){
+    const team = e.target.getAttribute("data-team");
+    openTeam(team);
+  }
+});
+
+window.openTeam = function(teamName){
+
+  const list = soldPlayers
+    .filter(p=>p.soldTeam === teamName)
+    .sort((a,b)=>b.soldAmount - a.soldAmount);
+
+  document.getElementById("teamModal").style.display = "flex";
+  document.getElementById("modalTitle").innerText = teamName;
+  document.getElementById("modalCount").innerText =
+    `Players: ${list.length}`;
+
+  const ul = document.getElementById("modalList");
+  ul.innerHTML = "";
+
+  if(!list.length){
+    ul.innerHTML = "<li>No players yet</li>";
+    return;
+  }
+
+  list.forEach(p=>{
+    ul.innerHTML += `
+<li style="
+list-style:none;
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+background:#123c6b;
+padding:8px;
+border-radius:10px;
+">
+
+<img src="${p.photo}" style="
+width:40px;
+height:40px;
+border-radius:50%;
+object-fit:cover;
+background:#fff;
+">
+
+<div style="flex:1;">
+<div style="font-weight:bold;">${p.name}</div>
+<div style="font-size:13px;">₹${p.soldAmount}</div>
+</div>
+
+</li>`;
+  });
+
+};
 
 const isAdmin=localStorage.getItem("isAdmin")==="true";
 
@@ -271,10 +362,9 @@ return (now - parseInt(loginTime)) < SESSION_LIMIT;
 }
 
 if(isOwnerSessionValid()){
-document.getElementById("ownerBar").style.display="block";
+  document.getElementById("ownerBar").style.display = "block";
 }else{
-localStorage.removeItem("ownerVerified");
-localStorage.removeItem("ownerLoginTime");
+  document.getElementById("ownerBar").style.display = "none"; // ✅ force hide
 }
 
 window.openOwnerLogin=()=>{
@@ -315,6 +405,9 @@ const o=d.data();
 wrap.innerHTML+=`
 <div class="card">
 
+
+
+
 <img src="${o.ownerImg||''}">
 
 ${canEdit?`
@@ -326,6 +419,10 @@ ${canEdit?`
 `
 <div class="name">${o.ownerName||''}</div>
 <div class="team">${o.teamName||''}</div>
+
+<button class="viewBtn" data-team="${o.teamName}">
+View Team
+</button>
 `
 }
 
@@ -406,6 +503,22 @@ console.log("Notification error",e);
 </script>
 
 <script>
+
+
+/* ✅ CLOSE TEAM MODAL ON OUTSIDE CLICK */
+document.addEventListener("click",(e)=>{
+  const modal = document.getElementById("teamModal");
+  if(modal && e.target === modal){
+    closeTeam();
+  }
+});
+
+
+  window.closeTeam = function(){
+  document.getElementById("teamModal").style.display = "none";
+};
+
+
 window.toggleNotifications=function(){
 const box=document.getElementById("notificationBox");
 
@@ -437,6 +550,74 @@ closePopup();
 }
 });
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ✅ TEAM VIEW MODAL -->
+<div id="teamModal" style="
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.7);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:3000;
+padding:10px;
+">
+
+  <div style="
+  background:#0f2e4d;
+  width:100%;
+  max-width:420px;
+  max-height:85%;
+  overflow:auto;
+  border-radius:14px;
+  padding:18px;
+  color:#fff;
+  ">
+
+    <h2 id="modalTitle"></h2>
+    <p id="modalCount"></p>
+    <ul id="modalList" style="padding:0;"></ul>
+
+    <button onclick="closeTeam()" style="
+    margin-top:12px;
+    width:100%;
+    background:red;
+    color:#fff;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    font-weight:bold;
+    ">
+    Close
+    </button>
+
+  </div>
+</div>
+
+
+
+
+
 
 </body>
 </html>
