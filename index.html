@@ -206,6 +206,49 @@ header h1{font-size:16px}
   }
 }
 
+
+/* 🎉 BIRTHDAY BLAST STYLE */
+.birthday-banner{
+  background: linear-gradient(90deg,#0f9d58,#1b5e20);
+  color:#fff;
+  text-align:center;
+  padding:14px;
+  border-radius:14px;
+  font-weight:700;
+  font-size:18px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 15px rgba(255,255,255,0.2);
+}
+
+.birthday-banner span{
+  color:#ffeb3b;
+  font-size:20px;
+}
+
+.sub-text{
+  font-size:13px;
+  margin-top:4px;
+  opacity:0.9;
+}
+
+/* 🎊 CONFETTI */
+.confetti{
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:yellow;
+  top:-10px;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0deg);}
+  100%{transform:translateY(200px) rotate(360deg);}
+}
+
+
+
 </style>
 </head>
 
@@ -323,14 +366,22 @@ Close
 
 <div class="announcement-bar" id="seasonAnnouncement">
 
-<div id="birthdayBox" style="
+<!-- <div id="birthdayBox" style="
   display:none;
   background:linear-gradient(90deg,#ff4081,#ff9800);
   color:#fff;
   padding:12px;
   text-align:center;
   font-weight:600;
-"></div>
+"></div> -->
+
+<div id="birthdayBox" style="display:none;">
+  <div class="birthday-banner">
+    🎉 Happy Birthday 🎂<br>
+    <span id="birthdayNames"></span>
+    <div class="sub-text">May all your dreams come true ✨</div>
+  </div>
+</div>
 
 
 <span>
@@ -867,11 +918,28 @@ onSnapshot(collection(db,"players"), async (snap)=>{
 
     const names = birthdayPlayers.map(p => p.name).join(", ");
 
-    box.innerHTML = `
-      🎉 Happy Birthday 🎂<br>
-      <b>${names}</b>
-    `;
-    box.style.display = "block";
+    // box.innerHTML = `
+    //   🎉 Happy Birthday 🎂<br>
+    //   <b>${names}</b>
+    // `;
+    // box.style.display = "block";
+
+    document.getElementById("birthdayNames").innerText = names;
+box.style.display = "block";
+
+/* 🎊 CONFETTI EFFECT */
+for(let i=0;i<25;i++){
+  const conf = document.createElement("div");
+  conf.className = "confetti";
+
+  conf.style.left = Math.random()*100 + "%";
+  conf.style.background = ["#ffeb3b","#ff4081","#00e5ff","#76ff03"][Math.floor(Math.random()*4)];
+  conf.style.animationDuration = (2 + Math.random()*3) + "s";
+
+  box.querySelector(".birthday-banner").appendChild(conf);
+
+  setTimeout(()=>conf.remove(),4000);
+}
 
     await triggerBirthdayNotification(names);
 
