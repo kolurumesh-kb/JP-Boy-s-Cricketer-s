@@ -322,6 +322,17 @@ Close
 </div>
 
 <div class="announcement-bar" id="seasonAnnouncement">
+
+<div id="birthdayBox" style="
+  display:none;
+  background:linear-gradient(90deg,#ff4081,#ff9800);
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-weight:600;
+"></div>
+
+
 <span>
 🏏 Season-4 starts in
 <span id="seasonTimer">Loading...</span>
@@ -495,7 +506,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebas
 import {
 getFirestore, doc, getDoc, setDoc,
 updateDoc, onSnapshot, increment,
-collection, orderBy, query, limit
+collection, orderBy, query, limit,addDoc
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -505,6 +516,30 @@ projectId:"jp-boys"
 });
 
 const db = getFirestore(app);
+
+
+/*  Birthday */
+
+function checkBirthdays(players){
+
+  const today = new Date();
+  const tMonth = today.getMonth() + 1;
+  const tDate = today.getDate();
+
+  return players.filter(p => {
+
+    if(!p.dob) return false;
+
+    const dob = new Date(p.dob);
+
+    return (
+      dob.getMonth() + 1 === tMonth &&
+      dob.getDate() === tDate
+    );
+
+  });
+
+}
 
 const visitRef = doc(db,"siteStats","visits");
 
@@ -788,6 +823,65 @@ onSnapshot(
 
   }
 );
+
+
+async function triggerBirthdayNotification(names){
+
+  const todayKey = new Date().toISOString().split("T")[0];
+  const ref = doc(db,"settings","birthday");
+
+  const snap = await getDoc(ref);
+  const lastSent = snap.exists() ? snap.data().lastSent : "";
+
+  // ✅ STOP if already sent today
+  if(lastSent === todayKey){
+    console.log("🎂 Already sent today");
+    return;
+  }
+
+  // ✅ ADD NOTIFICATION
+  await addDoc(collection(db,"notifications"),{
+    title:"🎂 Birthday Alert",
+    body:`Wish Happy Birthday to ${names}`,
+    time: Date.now(),
+    //  type:"admin"  // 🔥 IMPORTANT CHANGE
+    type:"birthday"
+  });
+
+  // ✅ SAVE FLAG
+  await setDoc(ref,{ lastSent: todayKey });
+
+  console.log("🎉 Birthday notification sent");
+}
+
+onSnapshot(collection(db,"players"), async (snap)=>{
+
+  const players = [];
+  snap.forEach(d => players.push(d.data()));
+
+  const birthdayPlayers = checkBirthdays(players);
+
+  const box = document.getElementById("birthdayBox");
+
+  if(birthdayPlayers.length > 0){
+
+    const names = birthdayPlayers.map(p => p.name).join(", ");
+
+    box.innerHTML = `
+      🎉 Happy Birthday 🎂<br>
+      <b>${names}</b>
+    `;
+    box.style.display = "block";
+
+    await triggerBirthdayNotification(names);
+
+  }else{
+    box.style.display = "none";
+  }
+
+});
+
+
 
 window.closePopup = function(){
   const popup = document.getElementById("adminPopup");
