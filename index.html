@@ -247,7 +247,59 @@ header h1{font-size:16px}
   100%{transform:translateY(200px) rotate(360deg);}
 }
 
+.menuIcon{
+    font-size:30px;
+    cursor:pointer;
+    color:white;
+}
 
+.sideMenu{
+
+    position:fixed;
+
+    top:0;
+
+    right:-280px;
+
+    width:260px;
+
+    height:100%;
+
+    background:#102840;
+
+    transition:.35s;
+
+    padding-top:70px;
+
+    z-index:9999;
+
+}
+
+.sideMenu a{
+
+    display:block;
+
+    color:white;
+
+    text-decoration:none;
+
+    padding:16px 25px;
+
+    border-bottom:1px solid rgba(255,255,255,.1);
+
+}
+
+.sideMenu a:hover{
+
+    background:#173d61;
+
+}
+
+.sideMenu.active{
+
+    right:0;
+
+}
 
 </style>
 </head>
@@ -255,19 +307,27 @@ header h1{font-size:16px}
 <body>
 
 <header>
-<h1>🏏 JP Boy's Cricketer's</h1>
+<!-- <h1>🏏 JP Boy's Cricketer's</h1> -->
+
+<!-- <div class="menuIcon" onclick="toggleMenu()">
+    ☰
+</div> -->
 
 <div style="display:flex;align-items:center;gap:10px;">
 <div class="nav-links">
+
+  <!-- <div id="sideMenu" class="sideMenu"> -->
 <a href="register.html">Register</a>
 <a href="owner.html">Owner's</a>
 <a href="player.html">Player's</a>
 <a href="auction.html">Admin Auction</a>
 <a href="schedule.html">Schedule</a>
 <a href="records.html">Season Records</a>
-<a href="auction-live.html">Live Auction</a>
+<a href="auction-live.html">Live Action</a>
 <a href="rules.html">Tournament Rules</a>
 <a href="monhtly kit payments.html">Monthly Kit Amount</a>
+<a href="admin-login.html">Admin Login</a>
+<a href="contact.html">Contact Us</a>
 </div>
 
 <!-- /* Notification Bell Icon */ -->
@@ -288,9 +348,12 @@ header h1{font-size:16px}
 <a href="auction.html">Admin Auction</a>
 <a href="schedule.html">Schedule</a>
 <a href="records.html">Season Records</a>
-<a href="auction-live.html">Live Auction</a>
+<a href="auction-live.html">Live Action</a>
 <a href="rules.html">Tournament Rules</a>
 <a href="monhtly kit payments.html">Monthly Kit Amount</a>
+<a href="admin-login.html">Admin Login</a>
+<a href="contact.html">Contact Us</a>
+
 </div>
 </header>
 
@@ -358,7 +421,7 @@ Close
 <div class="marquee">
 <span>📢🔥 **Attention Team Members!** 🔥
 
-🏏 Registrations have officially closed. The tournament kicks off on 9th & 10th May 2026. May the best teams rise and shine on the field — all the best!! 💪🔥
+🏏 JP Boy's Season-5 Tournament dates will be announced soon ....kindly wait for the latest Updates..💪🔥
 </span>
 </div>
 <span class="close-announce" onclick="hideAnnouncement()">✖</span>
@@ -385,7 +448,7 @@ Close
 
 
 <span>
-🏏 Season-4 starts in
+🏏 Season-5 starts in
 <span id="seasonTimer">Loading...</span>
 </span>
 <button class="announce-close" onclick="hideCountdown()">✖</button>
@@ -510,7 +573,7 @@ prevSlide();
 });
 
 /* ===== Countdown ===== */
-const seasonStart=new Date("2026-05-09T06:30:00").getTime();
+const seasonStart=new Date("2026-12-12T06:30:00").getTime();
 const timer=document.getElementById("seasonTimer");
 
 function updateCountdown(){
@@ -525,6 +588,19 @@ timer.innerHTML=`${d}d ${h}h ${m}m ${s}s`;
 }
 setInterval(updateCountdown,1000);
 updateCountdown();
+
+// Website humburger
+
+// function toggleMenu(){
+
+//     document
+//         .getElementById("sideMenu")
+//         .classList
+//         .toggle("active");
+
+// }
+
+// Mobile Humburger
 
 function toggleMenu(){
 const m=document.getElementById("mobileMenu");

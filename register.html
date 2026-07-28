@@ -613,6 +613,17 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
 
 });
 
+// ✅ Save DOB permanently
+await setDoc(
+  doc(db, "playerBirthdays", mobileInput.value.trim()),
+  {
+    name: nameInput.value.trim(),
+    mobile: mobileInput.value.trim(),
+    dob: dobInput.value,
+    updatedAt: Date.now()
+  }
+);
+
 /* 🔔 SEND NOTIFICATION TO DASHBOARD */
 
 await addDoc(collection(db,"notifications"), {
