@@ -1514,6 +1514,10 @@ onSnapshot(collection(db,"players"), snap=>{
   players.sort((a,b)=>b.createdAt-a.createdAt);
 
   const total=players.length;
+
+   // ⭐ Update Total Players Dashboard Card
+document.getElementById("totalPlayersCard").textContent = total;
+   
   const latest=players[0]?.name || "None";
   const lastFive=players.slice(0,5);
 
