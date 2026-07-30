@@ -881,10 +881,11 @@ font-size:20px;
         <div class="statTitle">
             📢 Notifications
         </div>
-
-        <div class="statValue">
-            Live
-        </div>
+        <div
+class="statValue"
+id="notificationStatusCard">
+0
+</div>
 
     </div>
 
@@ -1482,6 +1483,71 @@ toggleBtn.onclick = async ()=>{
 /* Initialize Button Text */
 refreshToggleText();
 
+/* Dashboard Status */
+
+const regCard = document.getElementById("registrationStatusCard");
+
+onSnapshot(doc(db,"settings","registration"),(snap)=>{
+
+    let open = true;
+
+    if(snap.exists()){
+        open = snap.data().open !== false;
+    }
+
+    regCard.innerHTML = open ? "OPEN" : "CLOSED";
+    regCard.style.color = open ? "#2ecc71" : "#e74c3c";
+
+    document.getElementById("notifyContent").innerHTML=`
+         Total Registered : <b>${total}</b><br>
+    Latest Player : <b>${latest}</b><br><br>
+
+    <div class="small">
+    Last 5 Registered:<br>
+    ${ lastFive.length
+      ? lastFive.map(p=>"• "+p.name).join("<br>")
+      : "No registrations yet"
+    }
+    </div>
+  `;
+
+  if(initialized){
+    playAlert();
+  }
+
+  initialized=true;
+});
+
+
+const auctionCard=document.getElementById("auctionStatusCard");
+
+onSnapshot(doc(db,"settings","auction"),(snap)=>{
+
+    let live=false;
+
+    if(snap.exists()){
+        live=snap.data().live===true;
+    }
+
+    auctionCard.innerHTML=live?"ON":"OFF";
+
+    auctionCard.style.color=
+        live ? "#2ecc71" : "#ff5555";
+});
+
+
+const notificationCard =
+document.getElementById("notificationStatusCard");
+
+onSnapshot(collection(db,"notifications"),(snap)=>{
+
+    notificationCard.innerHTML=snap.size;
+
+    notificationCard.style.color=
+    snap.size>0
+    ? "#00d4ff"
+    : "#999";
+});
 
 
 
