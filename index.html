@@ -80,6 +80,8 @@ background:none;border:none;color:#fff;
 font-size:18px;cursor:pointer;
 }
 
+
+
 /* ===== CAROUSEL ===== */
 .carousel{flex:1;overflow:hidden;position:relative;}
 .carousel-track{display:flex;height:100%;transition:transform 1s ease;}
@@ -301,6 +303,52 @@ header h1{font-size:16px}
 
 }
 
+
+
+
+
+.app-download-section {
+    background: linear-gradient(135deg,#102840,#173d61);
+    margin: 15px;
+    padding: 22px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.4);
+}
+
+.app-download-section h2 {
+    font-size: 21px;
+    margin-bottom: 8px;
+}
+
+.app-download-section p {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.download-app-btn {
+    display: inline-block;
+    background: linear-gradient(90deg,#00c853,#00a844);
+    color: white;
+    text-decoration: none;
+    padding: 13px 25px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.download-app-btn:hover {
+    transform: scale(1.04);
+}
+
+.app-version-text {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 12px;
+}
+
 </style>
 </head>
 
@@ -454,6 +502,32 @@ Close
 <button class="announce-close" onclick="hideCountdown()">✖</button>
 </div>
 
+
+
+
+<div class="app-download-section">
+
+    <h2>📱 Download JP Boys Android App</h2>
+
+    <p>
+        Get the official JP Boy's Cricketer's app
+        and enjoy all tournament updates!
+    </p>
+
+    <a
+      class="download-app-btn"
+      href="https://github.com/kolurumesh-kb/JP-Boy-s-Cricketer-s/releases/tag/v3.0"
+      target="_blank"
+      rel="noopener">
+      ⬇ Download APK
+    </a>
+
+    <div class="app-version-text">
+        Latest Android Version: 3.0
+    </div>
+
+</div>
+
 <div class="carousel">
 <button class="carousel-btn prev" onclick="prevSlide()">❮</button>
 <button class="carousel-btn next" onclick="nextSlide()">❯</button>
@@ -509,7 +583,7 @@ Close
 let tapCount=0;
 document.getElementById("adminTrigger").onclick=()=>{
 tapCount++;
-if(tapCount===7){window.location.href="admin-login.html";}
+if(tapCount===7){window.location.href="admin.html";}
 };
 
 /* ===== CAROUSEL SCRIPT ===== */
