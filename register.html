@@ -298,7 +298,8 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <input id="name" placeholder="Enter Name" required>
 
 <label>Mobile</label>
-<input id="mobile" type="tel" placeholder="Enter Mobile Number " required>
+<input id="mobile" type="tel" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" placeholder="Enter 10-digit Mobile Number" required>
+<div id="mobileError" class="error-text"></div>
 
 <label>Role</label>
 <select id="role" required>
@@ -420,7 +421,7 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <script type="module">
 /* ⭐ SAME SCRIPT — UNCHANGED */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc ,getDocs, doc, onSnapshot,setDoc}
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, onSnapshot, setDoc}
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -479,11 +480,16 @@ const receiptSize=document.getElementById("receiptSize");
 
 const nameInput=document.getElementById("name");
 const mobileInput=document.getElementById("mobile");
+const mobileError=document.getElementById("mobileError");
 const roleInput=document.getElementById("role");
 const battingInput=document.getElementById("batting");
 const bowlingInput=document.getElementById("bowling");
 const dobInput=document.getElementById("dob");
 const addressInput=document.getElementById("address");
+
+mobileInput.addEventListener("input", () => {
+  mobileError.textContent = "";
+});
 
 /* ===== Helper Functions ===== */
 
@@ -561,27 +567,128 @@ receipt.addEventListener("change",()=>{
   receiptSize.className="size-text size-valid";
 });
 
+
+/* ===== APPROVED MOBILE NUMBER CHECK ===== */
+const REGISTRATION_ERROR_MESSAGE =
+  "Server or Network Issue, Please try after sometime.";
+
+function normalizeRegistrationMobile(value){
+  let mobile = String(value || "").replace(/\D/g, "");
+
+  // Accept +91 / 91 prefix but store and check the 10-digit mobile.
+  if(mobile.length === 12 && mobile.startsWith("91")){
+    mobile = mobile.slice(2);
+  }
+
+  return mobile;
+}
+
+// async function isMobileApproved(mobile){
+//   const numberRef = doc(db, "approvedNumbers", mobile);
+//   const numberSnap = await getDoc(numberRef);
+
+//   return numberSnap.exists() &&
+//          String(numberSnap.data().status || "").toUpperCase() === "APPROVED";
+// }
+
+
+async function isMobileApproved(mobile){
+
+  // Read registration settings
+  const settingsRef = doc(db, "settings", "registration");
+  const settingsSnap = await getDoc(settingsRef);
+
+  if(!settingsSnap.exists()){
+    throw new Error("Registration settings not found");
+  }
+
+  const settings = settingsSnap.data();
+
+  // Registration closed
+  if(settings.open === false){
+    return false;
+  }
+
+  // Read mobile number status
+  const numberRef = doc(db, "approvedNumbers", mobile);
+  const numberSnap = await getDoc(numberRef);
+
+  const status = numberSnap.exists()
+    ? String(numberSnap.data().status || "").toUpperCase()
+    : "";
+
+  // Blocked numbers are always rejected
+  if(status === "BLOCKED"){
+    return false;
+  }
+
+  // Open registration: allow any number except BLOCKED
+  if(settings.allowAllNumbers === true){
+    return true;
+  }
+
+  // Whitelist registration: only APPROVED numbers
+  return status === "APPROVED";
+}
+
+
 /* ===== Form Submit ===== */
 
 regForm.addEventListener("submit",async(e)=>{
  e.preventDefault();
 
+ // Check the mobile number before reading/uploading images or creating a player.
+ mobileError.textContent = "";
+ const normalizedMobile = normalizeRegistrationMobile(mobileInput.value);
+
+ if(!/^[6-9][0-9]{9}$/.test(normalizedMobile)){
+  mobileError.textContent = "Please enter a valid 10-digit mobile number.";
+  mobileInput.focus();
+  return;
+ }
+
+ mobileInput.value = normalizedMobile;
+
+ loader.style.display = "flex";
+ loader.querySelector("p").textContent = "Checking mobile number...";
+
+ try{
+  const approved = await isMobileApproved(normalizedMobile);
+
+  if(!approved){
+   loader.style.display = "none";
+   mobileError.textContent = REGISTRATION_ERROR_MESSAGE;
+   alert(REGISTRATION_ERROR_MESSAGE);
+   return;
+  }
+ }catch(checkError){
+  console.error("Mobile approval check failed:", checkError);
+  loader.style.display = "none";
+  mobileError.textContent = REGISTRATION_ERROR_MESSAGE;
+  alert(REGISTRATION_ERROR_MESSAGE);
+  return;
+ }
+
  if(!photo.files[0] || !receipt.files[0]){
+  loader.style.display = "none";
   alert("Please upload all images");
   return;
  }
 
  if(!validateFileSize(photo.files[0])){
+  loader.style.display = "none";
   photoError.textContent="Profile Photo must be below 200KB to 400KB.";
   return;
  }
 
  if(!validateFileSize(receipt.files[0])){
+  loader.style.display = "none";
   receiptError.textContent="Receipt must be below 200KB to 400KB.";
   return;
  }
 
- loader.style.display="flex";
+ loader.querySelector("p").textContent = "Uploading… Please wait";
+ loader.style.display = "flex";
 
  try{
   const photo64=await toBase64(photo.files[0]);
@@ -600,7 +707,7 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
    playerId: playerId,
 
    name:nameInput.value.trim(),
-   mobile:mobileInput.value.trim(),
+   mobile:normalizedMobile,
    role:roleInput.value,
    batting:battingInput.value,
    bowling:bowlingInput.value||"NA",
@@ -615,7 +722,7 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
 
 // ✅ Save DOB permanently
 await setDoc(
-  doc(db, "playerBirthdays", mobileInput.value.trim()),
+  doc(db, "playerBirthdays", normalizedMobile),
   {
     name: nameInput.value.trim(),
     mobile: mobileInput.value.trim(),

@@ -349,6 +349,43 @@ header h1{font-size:16px}
     margin-top: 12px;
 }
 
+.apk-download-box {
+    position: relative;
+    padding: 20px;
+    margin: 15px 0;
+    background: #102840;
+    border: 1px solid #2196f3;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+}
+
+.apk-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.apk-download-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: green;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 10px;
+}
+
+.apk-version {
+    font-size: 13px;
+    color: #aaa;
+}
 </style>
 </head>
 
@@ -504,27 +541,31 @@ Close
 
 
 
+<!-- APK DOWNLOAD ANNOUNCEMENT -->
+<div id="apkDownloadBox" class="apk-download-box">
 
-<div class="app-download-section">
+    <button class="apk-close-btn"
+            onclick="closeApkDownload()"
+            title="Close">
+        ✕
+    </button>
 
     <h2>📱 Download JP Boys Android App</h2>
 
     <p>
-        Get the official JP Boy's Cricketer's app
-        and enjoy all tournament updates!
+        Get the official JP Boy's Cricketer's app and enjoy
+        all tournament updates!
     </p>
 
-    <a
-      class="download-app-btn"
-      href="https://github.com/kolurumesh-kb/JP-Boy-s-Cricketer-s/releases/tag/v3.0"
-      target="_blank"
-      rel="noopener">
-      ⬇ Download APK
+    <a href="https://github.com/kolurumesh-kb/JP-Boy-s-Cricketer-s/releases/tag/v3.0"
+       target="_blank"
+       class="apk-download-btn">
+        ⬇ Download APK
     </a>
 
-    <div class="app-version-text">
-        Latest Android Version: 3.0
-    </div>
+    <p class="apk-version">Latest Android Version: 3.0</p>
+
+</div>
 
 </div>
 
@@ -686,6 +727,20 @@ document.getElementById("announcement").style.display="none";
 function hideCountdown(){
 document.getElementById("seasonAnnouncement").style.display="none";
 }
+
+
+
+
+
+
+
+
+
+
+function closeApkDownload() {
+    document.getElementById("apkDownloadBox").style.display = "none";
+}
+
 </script>
 
 
