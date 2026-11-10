@@ -735,7 +735,7 @@ await setDoc(
 
 await addDoc(collection(db,"notifications"), {
   title: "🆕 New Player Registered",
-  body: nameInput.value.trim() + " has registered for Season-4 🏏",
+  body: nameInput.value.trim() + " has registered for <Season-5></Season-5> 🏏",
   time: Date.now(),
   type: "player_registration"   // ✅ IMPORTANT
 });
@@ -758,13 +758,13 @@ const userName = nameInput.value.trim();
 //   userName + ", Your Registration Successfully Completed 🎉";
 
 // document.getElementById("successSubText").innerText =
-//   "Welcome to JP Boy's Cricketer's Season-4";
+//   "Welcome to JP Boy's Cricketer's Season-5";
 
 document.getElementById("successTitle").innerText =
   userName + ", Your Registration Successfully Completed 🎉";
 
 document.getElementById("successSubText").innerText =
-  "Your Player ID : " + playerId + " | Welcome to JP Boy's Cricketer's Season-4";
+  "Your Player ID : " + playerId + " | Welcome to JP Boy's Cricketer's Season-5";
 
 document.getElementById("successScreen").style.display = "flex";
 
@@ -807,7 +807,7 @@ setTimeout(()=>{
 
   <div style="font-size:60px;animation:pop 0.6s ease;">✅</div>
   <h2 style="margin-top:20px;">Congratulations YourRegistration Successfully Completed</h2>
-  <p>Welcome to JP Boy's Cricketer's Season-4 🎉</p>
+  <p>Welcome to JP Boy's Cricketer's Season-5 🎉</p>
 </div> -->
 
 
@@ -819,7 +819,7 @@ setTimeout(()=>{
 
     <h2>Congratulations Your Registration Successfully Completed 🎉</h2>
 
-    <p>Welcome to JP Boy's Cricketer's Season-4</p>
+    <p>Welcome to JP Boy's Cricketer's Season-5</p>
 
     <div class="success-check">✔</div>
 
@@ -837,7 +837,7 @@ setTimeout(()=>{
     <h2 id="successTitle">Registration Successful 🎉</h2>
 
     <p id="successSubText">
-      Welcome to JP Boy's Cricketer's Season-4
+      Welcome to JP Boy's Cricketer's Season-5
     </p>
 
     <div class="success-check">✔</div>
