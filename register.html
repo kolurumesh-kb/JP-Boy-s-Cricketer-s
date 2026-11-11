@@ -401,7 +401,18 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <div id="receiptSize" class="size-text"></div>
 <div id="receiptError" class="error-text"></div>
 
-<button type="submit">Submit Registration</button>
+<!-- <button type="submit">Submit Registration</button> -->
+
+<button type="submit">🚀 Submit Registration</button>
+
+<button type="reset" id="resetFormBtn" style="
+  background:#ff4d4d;
+  color:#fff;
+  margin-top:10px;
+  font-weight:bold;
+">
+  🔄 Reset Form
+</button>
 
 </form>
 </main>
@@ -486,6 +497,33 @@ const battingInput=document.getElementById("batting");
 const bowlingInput=document.getElementById("bowling");
 const dobInput=document.getElementById("dob");
 const addressInput=document.getElementById("address");
+
+/* ===== RESET FORM ===== */
+
+regForm.addEventListener("reset", () => {
+
+  setTimeout(() => {
+
+    // Reset profile photo preview
+    preview.src = "";
+    preview.style.display = "none";
+
+    // Clear validation messages
+    photoError.textContent = "";
+    receiptError.textContent = "";
+    mobileError.textContent = "";
+
+    // Clear file size messages
+    photoSize.textContent = "";
+    receiptSize.textContent = "";
+
+    // Restore size message styling
+    photoSize.className = "size-text";
+    receiptSize.className = "size-text";
+
+  }, 0);
+
+});
 
 mobileInput.addEventListener("input", () => {
   mobileError.textContent = "";
