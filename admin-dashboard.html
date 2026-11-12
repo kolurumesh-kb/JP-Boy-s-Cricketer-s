@@ -1348,6 +1348,7 @@ import {
   doc,
   updateDoc,
   setDoc,
+  runTransaction,
   addDoc,  
   onSnapshot,
   limit,
@@ -1485,9 +1486,45 @@ refreshToggleText();
 
 /* Dashboard Status */
 
+// const regCard = document.getElementById("registrationStatusCard");
+
+// onSnapshot(doc(db,"settings","registration"),(snap)=>{
+
+//     let open = true;
+
+//     if(snap.exists()){
+//         open = snap.data().open !== false;
+//     }
+
+//     regCard.innerHTML = open ? "OPEN" : "CLOSED";
+//     regCard.style.color = open ? "#2ecc71" : "#e74c3c";
+
+    
+
+//     document.getElementById("notifyContent").innerHTML=`
+//          Total Registered : <b>${total}</b><br>
+//     Latest Player : <b>${latest}</b><br><br>
+
+//     <div class="small">
+//     Last 5 Registered:<br>
+//     ${ lastFive.length
+//       ? lastFive.map(p=>"• "+p.name).join("<br>")
+//       : "No registrations yet"
+//     }
+//     </div>
+//   `;
+
+//   if(initialized){
+//     playAlert();
+//   }
+
+//   initialized=true;
+// });
+
+
 const regCard = document.getElementById("registrationStatusCard");
 
-onSnapshot(doc(db,"settings","registration"),(snap)=>{
+onSnapshot(doc(db,"settings","registration"), (snap)=>{
 
     let open = true;
 
@@ -1496,26 +1533,11 @@ onSnapshot(doc(db,"settings","registration"),(snap)=>{
     }
 
     regCard.innerHTML = open ? "OPEN" : "CLOSED";
-    regCard.style.color = open ? "#2ecc71" : "#e74c3c";
 
-    document.getElementById("notifyContent").innerHTML=`
-         Total Registered : <b>${total}</b><br>
-    Latest Player : <b>${latest}</b><br><br>
+    regCard.style.color = open
+        ? "#2ecc71"
+        : "#e74c3c";
 
-    <div class="small">
-    Last 5 Registered:<br>
-    ${ lastFive.length
-      ? lastFive.map(p=>"• "+p.name).join("<br>")
-      : "No registrations yet"
-    }
-    </div>
-  `;
-
-  if(initialized){
-    playAlert();
-  }
-
-  initialized=true;
 });
 
 
@@ -2261,6 +2283,149 @@ window.handleResetAuction = async function(){
 
 }
 
+
+
+
+
+
+
+
+async function migrateExistingPlayerNumbers() {
+
+  try {
+
+    // Verify admin
+    // if (
+    //   !auth.currentUser ||
+    //   auth.currentUser.uid !== "8xwE61ITv5bR9ua41nKEIIlrz8n2"
+    // ) {
+    //   alert("Please login with the authorized admin account.");
+    //   return;
+    // }
+
+    // Read all existing players
+    const snapshot = await getDocs(collection(db, "players"));
+
+    const players = [];
+    const mobileMap = new Set();
+
+    snapshot.forEach((playerDoc) => {
+
+      const data = playerDoc.data();
+
+      let mobile = String(data.mobile || "").replace(/\D/g, "");
+
+      if (mobile.length === 12 && mobile.startsWith("91")) {
+        mobile = mobile.slice(2);
+      }
+
+      if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+        console.warn("Invalid mobile skipped:", playerDoc.id);
+        return;
+      }
+
+      if (!data.playerId) {
+        console.warn("Missing player ID:", playerDoc.id);
+        return;
+      }
+
+      if (mobileMap.has(mobile)) {
+        throw new Error(
+          "Duplicate mobile already exists in players: " + mobile
+        );
+      }
+
+      mobileMap.add(mobile);
+
+      players.push({
+        mobile,
+        playerDocId: playerDoc.id,
+        playerId: String(data.playerId),
+        name: String(data.name || ""),
+        registeredAt:
+          typeof data.createdAt === "number"
+            ? data.createdAt
+            : Date.now()
+      });
+
+    });
+
+    if (!players.length) {
+      alert("No valid existing players found.");
+      return;
+    }
+
+    if (!confirm(
+      "Found " + players.length +
+      " existing players.\n\n" +
+      "Create registration locks for these players?"
+    )) {
+      return;
+    }
+
+    let created = 0;
+    let alreadyLocked = 0;
+
+    for (const player of players) {
+
+      const registrationRef = doc(
+        db,
+        "registrationNumbers",
+        player.mobile
+      );
+
+      const result = await runTransaction(db, async (transaction) => {
+
+        const existing = await transaction.get(registrationRef);
+
+        if (existing.exists()) {
+          return "EXISTS";
+        }
+
+        transaction.set(registrationRef, {
+          mobile: player.mobile,
+          playerDocId: player.playerDocId,
+          playerId: player.playerId,
+          name: player.name,
+          registeredAt: player.registeredAt,
+          migratedAt: Date.now()
+        });
+
+        return "CREATED";
+
+      });
+
+      if (result === "CREATED") {
+        created++;
+      } else {
+        alreadyLocked++;
+      }
+
+    }
+
+    alert(
+      "Migration completed!\n\n" +
+      "Players found: " + players.length + "\n" +
+      "Locks created: " + created + "\n" +
+      "Already locked: " + alreadyLocked
+    );
+
+    console.log({
+      playersFound: players.length,
+      created,
+      alreadyLocked
+    });
+
+  } catch (error) {
+
+    console.error("Migration failed:", error);
+    alert("Migration failed: " + error.message);
+
+  }
+
+}
+
+window.migrateExistingPlayerNumbers = migrateExistingPlayerNumbers;
 
 
 </script>

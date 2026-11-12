@@ -432,7 +432,7 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 <script type="module">
 /* ⭐ SAME SCRIPT — UNCHANGED */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, getDoc, doc, onSnapshot, setDoc}
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, onSnapshot, setDoc,runTransaction}
 from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -516,7 +516,7 @@ regForm.addEventListener("reset", () => {
     // Clear file size messages
     photoSize.textContent = "";
     receiptSize.textContent = "";
-
+s
     // Restore size message styling
     photoSize.className = "size-text";
     receiptSize.className = "size-text";
@@ -740,23 +740,76 @@ const playerId = "JP-Boy's" + String(count).padStart(3,'0');
 
 
 
- await addDoc(collection(db,"players"),{
+//  await addDoc(collection(db,"players"),{
 
-   playerId: playerId,
+//    playerId: playerId,
 
-   name:nameInput.value.trim(),
-   mobile:normalizedMobile,
-   role:roleInput.value,
-   batting:battingInput.value,
-   bowling:bowlingInput.value||"NA",
-   dob:dobInput.value,
-   address:addressInput.value.trim(),
-   photo:photo64,
-   receipt:receipt64,
-   sold:false,
-   createdAt:Date.now()
+//    name:nameInput.value.trim(),
+//    mobile:normalizedMobile,
+//    role:roleInput.value,
+//    batting:battingInput.value,
+//    bowling:bowlingInput.value||"NA",
+//    dob:dobInput.value,
+//    address:addressInput.value.trim(),
+//    photo:photo64,
+//    receipt:receipt64,
+//    sold:false,
+//    createdAt:Date.now()
+
+// });
+
+
+// ========================================
+// ONE MOBILE NUMBER = ONE REGISTRATION
+// ========================================
+
+const registrationRef = doc(
+  db,
+  "registrationNumbers",
+  normalizedMobile
+);
+
+const playerRef = doc(collection(db, "players"));
+
+await runTransaction(db, async (transaction) => {
+
+  // Check whether this mobile number is already registered
+  const existingRegistration = await transaction.get(registrationRef);
+
+  if (existingRegistration.exists()) {
+    throw new Error("MOBILE_ALREADY_REGISTERED");
+  }
+
+  // Create the mobile number lock
+  transaction.set(registrationRef, {
+    mobile: normalizedMobile,
+    playerDocId: playerRef.id,
+    playerId: playerId,
+    name: nameInput.value.trim(),
+    registeredAt: Date.now()
+  });
+
+  // Save the player details
+  transaction.set(playerRef, {
+    playerId: playerId,
+    name: nameInput.value.trim(),
+    mobile: normalizedMobile,
+    role: roleInput.value,
+    batting: battingInput.value,
+    bowling: bowlingInput.value || "NA",
+    dob: dobInput.value,
+    address: addressInput.value.trim(),
+    photo: photo64,
+    receipt: receipt64,
+    sold: false,
+    createdAt: Date.now()
+  });
 
 });
+
+console.log("Player registration completed!");
+
+
 
 // ✅ Save DOB permanently
 await setDoc(
@@ -818,11 +871,30 @@ setTimeout(()=>{
 
 
 
- }catch(err){
-  loader.style.display="none";
-  alert("❌ Error: "+err.message);
- }
-});
+}catch(err){
+
+  loader.style.display = "none";
+
+  console.error("Registration Error:", err);
+
+  if (err.message === "MOBILE_ALREADY_REGISTERED") {
+
+    alert(
+      "⚠️ This mobile number is already registered!\n\n" +
+      "One mobile number can register only once."
+    );
+
+    mobileInput.focus();
+    return;
+  }
+
+  alert("❌ Error: " + err.message);
+
+}
+
+}
+
+);
 </script>
 
 
