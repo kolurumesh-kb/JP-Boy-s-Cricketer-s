@@ -5,7 +5,13 @@
 <title>Team Owners</title>
 
 <style>
-body{margin:0;font-family:Segoe UI;background:#eef2f7;}
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:#eef2f7;
+  padding-bottom:60px;
+  box-sizing:border-box;
+}
 
 header{
 background:linear-gradient(90deg,#1976d2,#512da8);
@@ -48,14 +54,19 @@ margin-bottom:10px;
 .team{color:#666;margin-top:4px;}
 
 footer{
-height:60px;
-background:linear-gradient(90deg,#1976d2,#512da8);
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:13px;
-margin-top:30px;
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:linear-gradient(90deg,#1976d2,#512da8);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  z-index:100;
+  box-sizing:border-box;
 }
 
 input{
@@ -182,11 +193,54 @@ transform:scale(1.05);
 box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
 
+
+
+
+
+
+/* OWNERS LOADER */
+.owner-loader{
+  width:100%;
+  min-height:250px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  grid-column:1/-1;
+  gap:14px;
+}
+
+.owner-spinner{
+  width:48px;
+  height:48px;
+  border:5px solid #d6d6d6;
+  border-top:5px solid #d4a017;
+  border-radius:50%;
+  animation:ownerSpin 0.8s linear infinite;
+}
+
+.owner-loading-text{
+  color:#b8860b;
+  font-weight:bold;
+  letter-spacing:2px;
+  animation:ownerPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ownerSpin{
+  to{transform:rotate(360deg);}
+}
+
+@keyframes ownerPulse{
+  50%{opacity:0.4;}
+}
+
+
 </style>
 </head>
 
 <body>
 
+  
 <header>
 <button onclick="location.href='index.html'">Dashboard</button>
 <div>Team Owners</div>
@@ -234,7 +288,16 @@ box-shadow:0 4px 12px rgba(0,0,0,0.3);
 </div>
 </div>
 
-<div class="container" id="cards"></div>
+<!-- <div class="container" id="cards"></div> -->
+
+<div class="container" id="cards">
+
+  <div class="owner-loader" id="ownerLoader">
+    <div class="owner-spinner"></div>
+    <div class="owner-loading-text">LOADING....</div>
+  </div>
+
+</div>
 
 <footer>
 🏏 JP Boy's Cricketer's © 2026 | Developed By KBU Software Pvt Ltd.
@@ -393,11 +456,67 @@ alert("Invalid Owner Code");
 }
 };
 
-/* RENDER */
+// /* RENDER */
+// const wrap=document.getElementById("cards");
+
+// onSnapshot(ownersRef,snap=>{
+// wrap.innerHTML="";
+
+
+/* RENDER OWNERS WITH LOADER */
+
 const wrap=document.getElementById("cards");
 
+let ownersFirstLoad=true;
+
 onSnapshot(ownersRef,snap=>{
-wrap.innerHTML="";
+
+  wrap.innerHTML="";
+
+  snap.forEach(d=>{
+
+    const o=d.data();
+
+    wrap.innerHTML+=`
+      <div class="card">
+
+        <img src="${o.ownerImg||''}">
+
+        ${canEdit?`
+          <input id="n${d.id}" value="${o.ownerName||''}">
+          <input id="t${d.id}" value="${o.teamName||''}">
+          <button class="save" onclick="save('${d.id}')">Save</button>
+        `:`
+          <div class="name">${o.ownerName||''}</div>
+          <div class="team">${o.teamName||''}</div>
+
+          <button class="viewBtn" data-team="${o.teamName}">
+            View Team
+          </button>
+        `}
+
+      </div>
+    `;
+
+  });
+
+  ownersFirstLoad=false;
+
+},error=>{
+
+  console.error("Owners loading error:",error);
+
+  if(ownersFirstLoad){
+    wrap.innerHTML=`
+      <div class="owner-loader">
+        <div style="color:#d32f2f;font-weight:bold;">
+          Unable to load owners. Please refresh.
+        </div>
+      </div>
+    `;
+  }
+
+});
 
 snap.forEach(d=>{
 const o=d.data();
@@ -428,7 +547,8 @@ View Team
 
 </div>`;
 });
-});
+
+
 
 /* SAVE */
 window.save=async(id)=>{
