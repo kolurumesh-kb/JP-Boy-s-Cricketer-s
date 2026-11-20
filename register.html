@@ -251,7 +251,49 @@ button{
 
 
 
+/* ROCKET LAUNCH */
+.rocket-overlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,#102840,#000);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3000;
+}
 
+.rocket{
+  font-size:75px;
+  animation:rocketLaunch 2s ease-in forwards;
+}
+
+@keyframes rocketLaunch{
+  0%{transform:translateY(300px) scale(.6);opacity:0}
+  20%{opacity:1}
+  100%{transform:translateY(-350px) scale(1.4);opacity:0}
+}
+
+/* FIREWORKS */
+.fireworks-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:2100;
+}
+
+.firework-piece{
+  position:absolute;
+  top:-50px;
+  animation:fireworkFall 3.5s ease-out forwards;
+}
+
+@keyframes fireworkFall{
+  0%{transform:translateY(0) rotate(0deg) scale(.5);opacity:0}
+  15%{opacity:1}
+  100%{transform:translateY(110vh) rotate(600deg) scale(1.3);opacity:0}
+}
 
 
 
@@ -278,7 +320,7 @@ button{
   <h3>📢 Important Notice: </h3>
   <h5>
   
-Player's Must Complete The Registration Process & Upload the Profile Photo & Payment Receipt. Kindly ensure that both the Profile Photo and Payment Receipt are under 1MB Only. After successful registration, please verify your status on the Player's Page.
+Player's Must Complete The Registration Process & Upload the Profile Photo & Payment Receipt. Kindly ensure that both the Profile Photo and Payment Receipt are under 500KB Only. After successful registration, please verify your status on the Player's Page.
   </h5>
 </div>
 
@@ -427,6 +469,15 @@ Player's Must Complete The Registration Process & Upload the Profile Photo & Pay
 </div>
 
 
+<!-- ROCKET LAUNCH SCREEN -->
+<div id="rocketOverlay" class="rocket-overlay">
+  <div class="rocket">🚀</div>
+</div>
+
+<!-- FIREWORKS EFFECT -->
+<div id="fireworksOverlay" class="fireworks-overlay"></div>
+
+
 
 
 <script type="module">
@@ -564,7 +615,7 @@ photo.addEventListener("change",()=>{
   if(!validateFileSize(file)){
     photoSize.textContent = sizeText;
     photoSize.className="size-text size-warning";
-    photoError.textContent="Profile Photo must be below 500KB (200KB to 400KB recommended).";
+    photoError.textContent="Profile Photo must be below 200KB (100KB to 200KB recommended).";
     photo.value="";
     preview.style.display="none";
     return;
@@ -596,7 +647,7 @@ receipt.addEventListener("change",()=>{
   if(!validateFileSize(file)){
     receiptSize.textContent=sizeText;
     receiptSize.className="size-text size-warning";
-    receiptError.textContent="Receipt must be below 500KB (200KB to 400KB recommended).";
+    receiptError.textContent="Receipt must be below 200KB (100KB to 200KB recommended).";
     receipt.value="";
     return;
   }
@@ -669,6 +720,67 @@ async function isMobileApproved(mobile){
   return status === "APPROVED";
 }
 
+
+
+/* ===== REGISTRATION CELEBRATION ===== */
+
+function launchRegistrationCelebration(userName, playerId){
+
+  const rocketOverlay = document.getElementById("rocketOverlay");
+  const successScreen = document.getElementById("successScreen");
+  const fireworksOverlay = document.getElementById("fireworksOverlay");
+
+  // Hide loader and launch rocket
+  loader.style.display = "none";
+  rocketOverlay.style.display = "flex";
+
+  // After rocket launch, show success message
+  setTimeout(() => {
+
+    rocketOverlay.style.display = "none";
+
+    document.getElementById("successTitle").innerText =
+      userName + ", Your Registration Successfully Completed 🎉";
+
+    document.getElementById("successSubText").innerText =
+      "Your Player ID : " + playerId +
+      " | Welcome to JP Boy's Cricketer's Season-5";
+
+    successScreen.style.display = "flex";
+
+    // Start fireworks celebration
+    fireworksOverlay.innerHTML = "";
+
+    const symbols = ["🎉","✨","🎊","💥","🎆","⭐"];
+
+    for(let i = 0; i < 35; i++){
+
+      const piece = document.createElement("span");
+
+      piece.className = "firework-piece";
+      piece.textContent =
+        symbols[Math.floor(Math.random() * symbols.length)];
+
+      piece.style.left = Math.random() * 100 + "%";
+      piece.style.animationDelay = Math.random() * 1.2 + "s";
+      piece.style.fontSize = (20 + Math.random() * 25) + "px";
+
+      fireworksOverlay.appendChild(piece);
+    }
+
+    fireworksOverlay.style.display = "block";
+
+    setTimeout(() => {
+      fireworksOverlay.style.display = "none";
+    }, 4500);
+
+    // Existing redirect timing
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 8000);
+
+  }, 2200);
+}
 
 /* ===== Form Submit ===== */
 
@@ -838,26 +950,33 @@ await addDoc(collection(db,"notifications"), {
 
 
   /*latest added for the success animation   */
-loader.style.display="none";
+// loader.style.display="none";
 
-// document.getElementById("successScreen").style.display="flex";
+// // document.getElementById("successScreen").style.display="flex";
 
 
-const userName = nameInput.value.trim();
+// const userName = nameInput.value.trim();
+
+// // document.getElementById("successTitle").innerText =
+// //   userName + ", Your Registration Successfully Completed 🎉";
+
+// // document.getElementById("successSubText").innerText =
+// //   "Welcome to JP Boy's Cricketer's Season-5";
 
 // document.getElementById("successTitle").innerText =
 //   userName + ", Your Registration Successfully Completed 🎉";
 
 // document.getElementById("successSubText").innerText =
-//   "Welcome to JP Boy's Cricketer's Season-5";
+//   "Your Player ID : " + playerId + " | Welcome to JP Boy's Cricketer's Season-5";
 
-document.getElementById("successTitle").innerText =
-  userName + ", Your Registration Successfully Completed 🎉";
+// document.getElementById("successScreen").style.display = "flex";
 
-document.getElementById("successSubText").innerText =
-  "Your Player ID : " + playerId + " | Welcome to JP Boy's Cricketer's Season-5";
 
-document.getElementById("successScreen").style.display = "flex";
+/* ROCKET + FIREWORKS CELEBRATION */
+
+const userName = nameInput.value.trim();
+
+launchRegistrationCelebration(userName, playerId);
 
 
 setTimeout(()=>{
